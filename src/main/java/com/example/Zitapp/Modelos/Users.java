@@ -1,0 +1,89 @@
+package com.example.Zitapp.Modelos;
+
+import jakarta.persistence.*;
+
+@Entity
+
+public class Users {
+    //atributos
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private  Long id;
+    @Column(nullable = false,length = 50)
+    private  String nombre;
+    private  String telefono;
+    private  String email;
+    private  String contrasena;
+
+    public enum TipoUsuario {
+        CLIENTE,
+        NEGOCIO
+    }
+
+    @Enumerated(EnumType.STRING)
+    private TipoUsuario Tipo;
+
+    protected Users(){
+    }
+
+    public Users(String contrasena, String email, Long id, String nombre, String telefono, TipoUsuario tipo) {
+        this.contrasena = contrasena;
+        this.email = email;
+        this.id = id;
+        this.nombre = nombre;
+        this.telefono = telefono;
+        Tipo = tipo;
+    }
+
+    public String getContrasena() {
+        return contrasena;
+    }
+
+    public void setContrasena(String contrasena) {
+        this.contrasena = contrasena;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getNombre() {
+        return nombre;
+    }
+
+    public void setNombre(String nombre) {
+        this.nombre = nombre;
+    }
+
+    public String getTelefono() {
+        return telefono;
+    }
+
+    public void setTelefono(String telefono) {
+        this.telefono = telefono;
+    }
+
+    public TipoUsuario getTipo() {
+        return Tipo;
+    }
+
+    public void setTipo(TipoUsuario tipo) {
+        // this.Tipo = tipo;
+    }
+}
+
+
+
+
