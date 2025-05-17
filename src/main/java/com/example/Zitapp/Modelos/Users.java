@@ -32,7 +32,7 @@ public class Users {
         this.id = id;
         this.nombre = nombre;
         this.telefono = telefono;
-        Tipo = tipo;
+        this.Tipo = tipo;
     }
 
     public String getContrasena() {
