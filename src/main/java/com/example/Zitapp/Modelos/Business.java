@@ -1,6 +1,9 @@
 package com.example.Zitapp.Modelos;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "businesses")
@@ -22,6 +25,10 @@ public class Business {
 
     @Column(name = "id_usuario")
     private Long idUsuario;
+
+    @OneToMany(mappedBy = "business", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
+    private List<BusinnesService> services = new ArrayList<>();
 
     protected Business() {}
 
@@ -95,5 +102,25 @@ public class Business {
 
     public void setIdUsuario(Long idUsuario) {
         this.idUsuario = idUsuario;
+    }
+
+    public List<BusinnesService> getServices() {
+        return services;
+    }
+
+    public void setServices(List<BusinnesService> services) {
+        this.services = services;
+    }
+
+    // Método de ayuda para agregar un servicio
+    public void addService(BusinnesService service) {
+        services.add(service);
+        service.setBusiness(this);
+    }
+
+    // Método de ayuda para eliminar un servicio
+    public void removeService(BusinnesService service) {
+        services.remove(service);
+        service.setBusiness(null);
     }
 }
