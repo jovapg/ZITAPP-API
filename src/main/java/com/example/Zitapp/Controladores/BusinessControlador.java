@@ -7,11 +7,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/business")
+@CrossOrigin(origins = "*")
 public class BusinessControlador {
 
     @Autowired
@@ -23,9 +25,14 @@ public class BusinessControlador {
      * @return el negocio creado
      */
     @PostMapping
-    public ResponseEntity<Business> crearBusiness(@RequestBody Business business) {
-        Business nuevoBusiness = businessServicio.saveBusiness(business);
-        return new ResponseEntity<>(nuevoBusiness, HttpStatus.CREATED);
+    public ResponseEntity<?> crearBusiness(@RequestBody Business business) {
+        try {
+            Business nuevoBusiness = businessServicio.saveBusiness(business);
+            return new ResponseEntity<>(nuevoBusiness, HttpStatus.CREATED);
+        } catch (Exception e) {
+            return new ResponseEntity<>("Error al crear el negocio: " + e.getMessage(),
+                    HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     /**
@@ -33,9 +40,14 @@ public class BusinessControlador {
      * @return lista de todos los negocios
      */
     @GetMapping
-    public List<Business> obtenerTodos() {
-        List<Business> businesses = businessServicio.getAll();
-        return businesses;
+    public ResponseEntity<?> obtenerTodos() {
+        try {
+            List<Business> businesses = businessServicio.getAll();
+            return new ResponseEntity<>(businesses, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>("Error al obtener los negocios: " + e.getMessage(),
+                    HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     /**
@@ -44,11 +56,20 @@ public class BusinessControlador {
      * @return el negocio encontrado o 404 si no existe
      */
     @GetMapping("/{id}")
-    public ResponseEntity<Business> obtenerPorId(@PathVariable("id") Long id) {
-        Optional<Business> business = businessServicio.getById(id);
+    public ResponseEntity<?> obtenerPorId(@PathVariable("id") Long id) {
+        try {
+            Optional<Business> business = businessServicio.getById(id);
 
-        return business.map(value -> new ResponseEntity<>(value, HttpStatus.OK))
-                .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
+            if (business.isPresent()) {
+                return new ResponseEntity<>(business.get(), HttpStatus.OK);
+            } else {
+                return new ResponseEntity<>("Negocio no encontrado con id: " + id,
+                        HttpStatus.NOT_FOUND);
+            }
+        } catch (Exception e) {
+            return new ResponseEntity<>("Error al obtener el negocio: " + e.getMessage(),
+                    HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     /**
@@ -58,12 +79,21 @@ public class BusinessControlador {
      * @return el negocio actualizado o 404 si no existe
      */
     @PutMapping("/{id}")
-    public ResponseEntity<Business> actualizarBusiness(@PathVariable("id") Long id,
-                                                       @RequestBody Business businessDetalles) {
-        Optional<Business> businessActualizado = businessServicio.updateBusiness(id, businessDetalles);
+    public ResponseEntity<?> actualizarBusiness(@PathVariable("id") Long id,
+                                                @RequestBody Business businessDetalles) {
+        try {
+            Optional<Business> businessActualizado = businessServicio.updateBusiness(id, businessDetalles);
 
-        return businessActualizado.map(value -> new ResponseEntity<>(value, HttpStatus.OK))
-                .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
+            if (businessActualizado.isPresent()) {
+                return new ResponseEntity<>(businessActualizado.get(), HttpStatus.OK);
+            } else {
+                return new ResponseEntity<>("Negocio no encontrado con id: " + id,
+                        HttpStatus.NOT_FOUND);
+            }
+        } catch (Exception e) {
+            return new ResponseEntity<>("Error al actualizar el negocio: " + e.getMessage(),
+                    HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     /**
@@ -72,13 +102,19 @@ public class BusinessControlador {
      * @return 204 si se eliminó correctamente, 404 si no existe
      */
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> eliminarBusiness(@PathVariable("id") Long id) {
-        boolean eliminado = businessServicio.deleteBusiness(id);
+    public ResponseEntity<?> eliminarBusiness(@PathVariable("id") Long id) {
+        try {
+            boolean eliminado = businessServicio.deleteBusiness(id);
 
-        if (eliminado) {
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        } else {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            if (eliminado) {
+                return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            } else {
+                return new ResponseEntity<>("Negocio no encontrado con id: " + id,
+                        HttpStatus.NOT_FOUND);
+            }
+        } catch (Exception e) {
+            return new ResponseEntity<>("Error al eliminar el negocio: " + e.getMessage(),
+                    HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 }

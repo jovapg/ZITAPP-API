@@ -2,6 +2,8 @@ package com.example.Zitapp.Modelos;
 
 import jakarta.persistence.*;
 
+import java.util.List;
+
 @Entity
 
 public class Users {
@@ -21,7 +23,7 @@ public class Users {
     }
 
     @Enumerated(EnumType.STRING)
-    private TipoUsuario Tipo;
+    private TipoUsuario tipo;
 
     protected Users(){
     }
@@ -32,7 +34,7 @@ public class Users {
         this.id = id;
         this.nombre = nombre;
         this.telefono = telefono;
-        this.Tipo = tipo;
+        this.tipo = tipo;
     }
 
     public String getContrasena() {
@@ -76,12 +78,15 @@ public class Users {
     }
 
     public TipoUsuario getTipo() {
-        return Tipo;
+        return this.tipo;
     }
 
     public void setTipo(TipoUsuario tipo) {
-        // this.Tipo = tipo;
+        this.tipo = tipo;
     }
+
+    @OneToMany(mappedBy = "client", cascade = CascadeType.REMOVE)
+    private List<Appointments> appointments;
 }
 
 
