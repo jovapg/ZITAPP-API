@@ -22,8 +22,21 @@ public class UsersServicios {
 
     // Crear usuario
     public Users crearUsuario(Users user) {
+        if (usersRepository.findByEmail(user.getEmail()).isPresent()) {
+            throw new IllegalArgumentException("El correo ya está registrado.");
+        }
+
+        if (usersRepository.findByNombre(user.getNombre()).isPresent()) {
+            throw new IllegalArgumentException("El nombre ya está en uso.");
+        }
+
+        if (usersRepository.findByTelefono(user.getTelefono()).isPresent()) {
+            throw new IllegalArgumentException("El teléfono ya está registrado.");
+        }
+
         return usersRepository.save(user);
     }
+
 
     // Obtener todos los usuarios
     public List<Users> obtenerTodos() {

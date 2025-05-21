@@ -19,7 +19,8 @@ public class Users {
 
     public enum TipoUsuario {
         CLIENTE,
-        NEGOCIO
+        NEGOCIO,
+        ADMIN
     }
 
     @Enumerated(EnumType.STRING)
