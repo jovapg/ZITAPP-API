@@ -119,4 +119,13 @@ public class AppointmentsServicios {
     }
 
 
+    public void EliminarCita(Long id) throws Exception {
+        Optional<Appointments> cita = appointmentsRepositorio.findById(id);
+        if (cita.isPresent()) {
+            appointmentsRepositorio.deleteById(id);
+        } else {
+            throw new Exception("La cita con ID " + id + " no existe.");
+        }
+    }
+
 }

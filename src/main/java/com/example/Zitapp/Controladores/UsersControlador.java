@@ -300,5 +300,8 @@ public class UsersControlador {
                     .status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Collections.singletonMap("error", "Error al procesar la solicitud: " + e.getMessage()));
         }
+
     }
+
+
 }
