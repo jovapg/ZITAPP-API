@@ -34,7 +34,7 @@ CREATE TABLE `appointments` (
   KEY `idx_appointments_business` (`id_negocio`),
   CONSTRAINT `appointments_ibfk_1` FOREIGN KEY (`id_cliente`) REFERENCES `users` (`id`),
   CONSTRAINT `appointments_ibfk_2` FOREIGN KEY (`id_negocio`) REFERENCES `businesses` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -63,7 +63,7 @@ CREATE TABLE `availability` (
   PRIMARY KEY (`id`),
   KEY `idx_availability_business` (`id_negocio`),
   CONSTRAINT `availability_ibfk_1` FOREIGN KEY (`id_negocio`) REFERENCES `businesses` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=30 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=30 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -92,7 +92,7 @@ CREATE TABLE `business` (
   `imagen_url` varchar(255) DEFAULT NULL,
   `nombre` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -125,7 +125,7 @@ CREATE TABLE `businesses` (
   PRIMARY KEY (`id`),
   KEY `idx_business_user` (`id_usuario`),
   CONSTRAINT `businesses_ibfk_1` FOREIGN KEY (`id_usuario`) REFERENCES `users` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -136,6 +136,33 @@ LOCK TABLES `businesses` WRITE;
 /*!40000 ALTER TABLE `businesses` DISABLE KEYS */;
 INSERT INTO `businesses` VALUES (1,'Peluquería Carlitos','Belleza','Peluquería profesional para caballeros y damas','Calle Principal 123','https://example.com/images/peluqueria.jpg',3,NULL,NULL,NULL),(2,'Clínica Dental Ana','Salud','Servicios dentales de alta calidad','Avenida Central 456','https://example.com/images/dental.jpg',4,NULL,NULL,NULL),(3,'Gimnasio Roberto','Fitness','Equipamiento moderno y entrenadores personales','Plaza Mayor 789','https://example.com/images/gym.jpg',5,NULL,NULL,NULL),(4,'Taller Mecánico Laura','Automotriz','Reparación y mantenimiento de vehículos','Carretera Norte 101','https://example.com/images/taller.jpg',8,NULL,NULL,NULL),(5,'Centro de Masajes Carmen','Bienestar','Masajes terapéuticos y relajantes','Calle Secundaria 202','https://example.com/images/masajes.jpg',10,NULL,NULL,NULL),(6,'Peluquería Carlos',NULL,NULL,NULL,'https://example.com/images/peluqueria.jpg',3,NULL,NULL,NULL);
 /*!40000 ALTER TABLE `businesses` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `services`
+--
+
+DROP TABLE IF EXISTS `services`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `services` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `descripcion` varchar(255) DEFAULT NULL,
+  `nombre` varchar(255) DEFAULT NULL,
+  `precio` double DEFAULT NULL,
+  `business_id` bigint NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `services`
+--
+
+LOCK TABLES `services` WRITE;
+/*!40000 ALTER TABLE `services` DISABLE KEYS */;
+INSERT INTO `services` VALUES (1,'Mantenimiento','Mantenimiento',20,1),(2,'Mantenimiento','Mantenimiento',20,2);
+/*!40000 ALTER TABLE `services` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -154,7 +181,7 @@ CREATE TABLE `users` (
   `telefono` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `email` (`email`)
-) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -176,4 +203,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-05-20 14:41:11
+-- Dump completed on 2025-05-23 17:08:25

@@ -54,6 +54,10 @@ public class BusinessServiceControlador {
     }
 
     // Obtener servicios por ID de negocio
+
+    //http://localhost:8081/api/services/businesses/1/services
+
+
     @GetMapping("/businesses/{businessId}/services")
     public ResponseEntity<Object> obtenerServiciosPorNegocioId(@PathVariable Long businessId) {
         try {
@@ -67,12 +71,16 @@ public class BusinessServiceControlador {
     }
 
     // Crear un nuevo servicio asociado a un negocio
+
+    //http://localhost:8081/api/services/businesses/1
     // JSON para creacion
     // {
     //      "nombre": "Mantenimiento",
     //      "descripcion": "Mantenimiento",
     //      "precio": 20.000
     //}
+
+
     @PostMapping("/businesses/{businessId}")
     public ResponseEntity<Object> crearServicio(@PathVariable Long businessId, @RequestBody BusinnesService service) {
         try {
@@ -88,6 +96,9 @@ public class BusinessServiceControlador {
     }
 
     // Actualizar un servicio existente
+
+    //http://localhost:8081/api/services/1
+
     @PutMapping("/{id}")
     public ResponseEntity<Object> actualizarServicio(@PathVariable Long id, @RequestBody BusinnesService serviceDetails) {
         try {
@@ -103,6 +114,9 @@ public class BusinessServiceControlador {
     }
 
     // Eliminar un servicio
+
+    //http://localhost:8081/api/services/1
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Object> eliminarServicio(@PathVariable Long id) {
         try {

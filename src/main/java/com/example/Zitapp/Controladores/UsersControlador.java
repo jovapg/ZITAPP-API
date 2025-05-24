@@ -185,6 +185,7 @@ public class UsersControlador {
      * @param datosActualizados nuevos datos del usuario
      * @return ResponseEntity con el usuario actualizado o error
      */
+
     @PutMapping("/{id}")   //http://localhost:8081/api/users/{id}
     public ResponseEntity<?> actualizarUsuario(@PathVariable Long id, @RequestBody Users datosActualizados) {
         try {
