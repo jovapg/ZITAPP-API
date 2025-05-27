@@ -1,179 +1,318 @@
--- MySQL dump 10.13  Distrib 9.2.0, for Linux (x86_64)
+-- phpMyAdmin SQL Dump
+-- version 5.2.1
+-- https://www.phpmyadmin.net/
 --
--- Host: localhost    Database: zitapp
--- ------------------------------------------------------
--- Server version	9.2.0
+-- Servidor: 127.0.0.1
+-- Tiempo de generación: 27-05-2025 a las 22:36:47
+-- Versión del servidor: 10.4.32-MariaDB
+-- Versión de PHP: 8.2.12
+
+SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
+START TRANSACTION;
+SET time_zone = "+00:00";
+
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
 /*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
-/*!50503 SET NAMES utf8mb4 */;
-/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
-/*!40103 SET TIME_ZONE='+00:00' */;
-/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
-/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
-/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
-/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
+/*!40101 SET NAMES utf8mb4 */;
 
 --
--- Table structure for table `appointments`
+-- Base de datos: `zitapp`
 --
 
-DROP TABLE IF EXISTS `appointments`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `appointments`
+--
+
 CREATE TABLE `appointments` (
-  `id` bigint NOT NULL AUTO_INCREMENT,
-  `id_cliente` int NOT NULL,
-  `id_negocio` int NOT NULL,
+  `id` bigint(20) NOT NULL,
+  `id_cliente` int(11) NOT NULL,
+  `id_negocio` int(11) NOT NULL,
   `fecha` date NOT NULL,
   `hora` time NOT NULL,
-  `estado` varchar(20) DEFAULT 'pendiente',
-  PRIMARY KEY (`id`),
-  KEY `idx_appointments_client` (`id_cliente`),
-  KEY `idx_appointments_business` (`id_negocio`),
-  CONSTRAINT `appointments_ibfk_1` FOREIGN KEY (`id_cliente`) REFERENCES `users` (`id`),
-  CONSTRAINT `appointments_ibfk_2` FOREIGN KEY (`id_negocio`) REFERENCES `businesses` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
+  `estado` varchar(20) DEFAULT 'pendiente'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `appointments`
+-- Volcado de datos para la tabla `appointments`
 --
 
-LOCK TABLES `appointments` WRITE;
-/*!40000 ALTER TABLE `appointments` DISABLE KEYS */;
-INSERT INTO `appointments` VALUES (2,2,2,'2025-05-11','09:15:00','CONFIRMADA'),(3,6,3,'2025-05-12','18:00:00','PENDIENTE'),(4,7,4,'2025-05-13','14:30:00','CONFIRMADA'),(5,9,5,'2025-05-14','12:00:00','PENDIENTE'),(7,2,5,'2025-05-16','16:30:00','CONFIRMADA'),(8,6,2,'2025-05-17','11:45:00','PENDIENTE'),(9,7,1,'2025-05-18','15:00:00','CONFIRMADA'),(10,9,4,'2025-05-19','09:30:00','CONFIRMADA'),(12,2,3,'2025-05-21','08:00:00','CONFIRMADA'),(13,6,4,'2025-05-22','13:30:00','CANCELADA'),(14,7,2,'2025-05-23','10:45:00','PENDIENTE'),(15,9,1,'2025-05-24','16:00:00','CONFIRMADA');
-/*!40000 ALTER TABLE `appointments` ENABLE KEYS */;
-UNLOCK TABLES;
+INSERT INTO `appointments` (`id`, `id_cliente`, `id_negocio`, `fecha`, `hora`, `estado`) VALUES
+(2, 2, 2, '2025-05-11', '09:15:00', 'FINALIZADA'),
+(3, 17, 3, '2025-05-12', '18:00:00', 'PENDIENTE'),
+(4, 17, 4, '2025-05-13', '14:30:00', 'CONFIRMADA'),
+(5, 9, 5, '2025-05-14', '12:00:00', 'PENDIENTE'),
+(7, 2, 5, '2025-05-16', '16:30:00', 'CONFIRMADA'),
+(8, 6, 2, '2025-05-17', '11:45:00', 'PENDIENTE'),
+(9, 7, 1, '2025-05-18', '15:00:00', 'CONFIRMADA'),
+(10, 9, 4, '2025-05-19', '09:30:00', 'CONFIRMADA'),
+(12, 2, 3, '2025-05-21', '08:00:00', 'CONFIRMADA'),
+(13, 6, 4, '2025-05-22', '13:30:00', 'CANCELADA'),
+(14, 7, 2, '2025-05-23', '10:45:00', 'PENDIENTE'),
+(15, 9, 1, '2025-05-24', '16:00:00', 'CONFIRMADA');
+
+-- --------------------------------------------------------
 
 --
--- Table structure for table `availability`
+-- Estructura de tabla para la tabla `availability`
 --
 
-DROP TABLE IF EXISTS `availability`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `availability` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `id_negocio` int NOT NULL,
+  `id` int(11) NOT NULL,
+  `id_negocio` int(11) NOT NULL,
   `día` varchar(255) NOT NULL,
   `hora_inicio` time NOT NULL,
-  `hora_fin` time NOT NULL,
-  PRIMARY KEY (`id`),
-  KEY `idx_availability_business` (`id_negocio`),
-  CONSTRAINT `availability_ibfk_1` FOREIGN KEY (`id_negocio`) REFERENCES `businesses` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=30 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
+  `hora_fin` time NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `availability`
+-- Volcado de datos para la tabla `availability`
 --
 
-LOCK TABLES `availability` WRITE;
-/*!40000 ALTER TABLE `availability` DISABLE KEYS */;
-INSERT INTO `availability` VALUES (1,1,'Lunes','09:00:00','18:00:00'),(2,1,'Martes','09:00:00','18:00:00'),(3,1,'Miércoles','09:00:00','18:00:00'),(4,1,'Jueves','09:00:00','18:00:00'),(5,1,'Viernes','09:00:00','17:00:00'),(6,2,'Lunes','08:00:00','16:00:00'),(7,2,'Martes','08:00:00','16:00:00'),(8,2,'Miércoles','08:00:00','16:00:00'),(9,2,'Jueves','08:00:00','16:00:00'),(10,2,'Viernes','08:00:00','14:00:00'),(11,3,'Lunes','06:00:00','22:00:00'),(12,3,'Martes','06:00:00','22:00:00'),(13,3,'Miércoles','06:00:00','22:00:00'),(14,3,'Jueves','06:00:00','22:00:00'),(15,3,'Viernes','06:00:00','22:00:00'),(16,3,'Sábado','08:00:00','20:00:00'),(17,3,'Domingo','08:00:00','14:00:00'),(18,4,'Lunes','08:00:00','18:00:00'),(19,4,'Martes','08:00:00','18:00:00'),(20,4,'Miércoles','08:00:00','18:00:00'),(21,4,'Jueves','08:00:00','18:00:00'),(22,4,'Viernes','08:00:00','18:00:00'),(23,4,'Sábado','09:00:00','13:00:00'),(24,5,'Martes','10:00:00','20:00:00'),(25,5,'Miércoles','10:00:00','20:00:00'),(26,5,'Jueves','10:00:00','20:00:00'),(27,5,'Viernes','10:00:00','20:00:00'),(28,5,'Sábado','10:00:00','16:00:00'),(29,1,'Lunes','09:00:00','18:00:00');
-/*!40000 ALTER TABLE `availability` ENABLE KEYS */;
-UNLOCK TABLES;
+INSERT INTO `availability` (`id`, `id_negocio`, `día`, `hora_inicio`, `hora_fin`) VALUES
+(1, 1, 'Lunes', '09:00:00', '18:00:00'),
+(2, 1, 'Martes', '09:00:00', '18:00:00'),
+(3, 1, 'Miércoles', '09:00:00', '18:00:00'),
+(4, 1, 'Jueves', '09:00:00', '18:00:00'),
+(5, 1, 'Viernes', '09:00:00', '17:00:00'),
+(6, 2, 'Lunes', '08:00:00', '16:00:00'),
+(7, 2, 'Martes', '08:00:00', '16:00:00'),
+(8, 2, 'Miércoles', '08:00:00', '16:00:00'),
+(9, 2, 'Jueves', '08:00:00', '16:00:00'),
+(10, 2, 'Viernes', '08:00:00', '14:00:00'),
+(11, 3, 'Lunes', '06:00:00', '22:00:00'),
+(12, 3, 'Martes', '06:00:00', '22:00:00'),
+(13, 3, 'Miércoles', '06:00:00', '22:00:00'),
+(14, 3, 'Jueves', '06:00:00', '22:00:00'),
+(15, 3, 'Viernes', '06:00:00', '22:00:00'),
+(16, 3, 'Sábado', '08:00:00', '20:00:00'),
+(17, 3, 'Domingo', '08:00:00', '14:00:00'),
+(18, 4, 'Lunes', '08:00:00', '18:00:00'),
+(19, 4, 'Martes', '08:00:00', '18:00:00'),
+(20, 4, 'Miércoles', '08:00:00', '18:00:00'),
+(21, 4, 'Jueves', '08:00:00', '18:00:00'),
+(22, 4, 'Viernes', '08:00:00', '18:00:00'),
+(23, 4, 'Sábado', '09:00:00', '13:00:00'),
+(24, 5, 'Martes', '10:00:00', '20:00:00'),
+(25, 5, 'Miércoles', '10:00:00', '20:00:00'),
+(26, 5, 'Jueves', '10:00:00', '20:00:00'),
+(27, 5, 'Viernes', '10:00:00', '20:00:00'),
+(28, 5, 'Sábado', '10:00:00', '16:00:00'),
+(29, 1, 'Lunes', '09:00:00', '18:00:00');
+
+-- --------------------------------------------------------
 
 --
--- Table structure for table `business`
+-- Estructura de tabla para la tabla `business`
 --
 
-DROP TABLE IF EXISTS `business`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `business` (
-  `id` bigint NOT NULL AUTO_INCREMENT,
+  `id` bigint(20) NOT NULL,
   `categoria` varchar(255) DEFAULT NULL,
   `descripcion` varchar(255) DEFAULT NULL,
   `direccion` varchar(255) DEFAULT NULL,
-  `id_usuario` bigint DEFAULT NULL,
+  `id_usuario` bigint(20) DEFAULT NULL,
   `imagen_url` varchar(255) DEFAULT NULL,
-  `nombre` varchar(255) DEFAULT NULL,
-  PRIMARY KEY (`id`)
+  `nombre` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
+
+-- --------------------------------------------------------
 
 --
--- Dumping data for table `business`
+-- Estructura de tabla para la tabla `businesses`
 --
 
-LOCK TABLES `business` WRITE;
-/*!40000 ALTER TABLE `business` DISABLE KEYS */;
-/*!40000 ALTER TABLE `business` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Table structure for table `businesses`
---
-
-DROP TABLE IF EXISTS `businesses`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `businesses` (
-  `id` int NOT NULL AUTO_INCREMENT,
+  `id` int(11) NOT NULL,
   `nombre` varchar(255) DEFAULT NULL,
   `categoría` varchar(50) DEFAULT NULL,
-  `descripción` text,
+  `descripción` text DEFAULT NULL,
   `dirección` varchar(200) DEFAULT NULL,
   `imagen_url` varchar(255) DEFAULT NULL,
-  `id_usuario` int NOT NULL,
+  `id_usuario` int(11) NOT NULL,
   `categoria` varchar(255) DEFAULT NULL,
   `descripcion` varchar(255) DEFAULT NULL,
-  `direccion` varchar(255) DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  KEY `idx_business_user` (`id_usuario`),
-  CONSTRAINT `businesses_ibfk_1` FOREIGN KEY (`id_usuario`) REFERENCES `users` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci
-/*!40101 SET character_set_client = @saved_cs_client */;
+  `direccion` varchar(255) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `businesses`
+-- Volcado de datos para la tabla `businesses`
 --
 
-LOCK TABLES `businesses` WRITE;
-/*!40000 ALTER TABLE `businesses` DISABLE KEYS */;
-INSERT INTO `businesses` VALUES (1,'Peluquería Carlitos','Belleza','Peluquería profesional para caballeros y damas','Calle Principal 123','https://example.com/images/peluqueria.jpg',3,NULL,NULL,NULL),(2,'Clínica Dental Ana','Salud','Servicios dentales de alta calidad','Avenida Central 456','https://example.com/images/dental.jpg',4,NULL,NULL,NULL),(3,'Gimnasio Roberto','Fitness','Equipamiento moderno y entrenadores personales','Plaza Mayor 789','https://example.com/images/gym.jpg',5,NULL,NULL,NULL),(4,'Taller Mecánico Laura','Automotriz','Reparación y mantenimiento de vehículos','Carretera Norte 101','https://example.com/images/taller.jpg',8,NULL,NULL,NULL),(5,'Centro de Masajes Carmen','Bienestar','Masajes terapéuticos y relajantes','Calle Secundaria 202','https://example.com/images/masajes.jpg',10,NULL,NULL,NULL),(6,'Peluquería Carlos',NULL,NULL,NULL,'https://example.com/images/peluqueria.jpg',3,NULL,NULL,NULL);
-/*!40000 ALTER TABLE `businesses` ENABLE KEYS */;
-UNLOCK TABLES;
+INSERT INTO `businesses` (`id`, `nombre`, `categoría`, `descripción`, `dirección`, `imagen_url`, `id_usuario`, `categoria`, `descripcion`, `direccion`) VALUES
+(1, 'Peluquería juanito', NULL, '', '', 'https://media.istockphoto.com/id/1497806504/es/foto/peluquer%C3%ADa-en-sal%C3%B3n-de-belleza-la-mujer-se-peina-en-el-sal%C3%B3n-de-belleza-moderno-estilista-seca.jpg?s=1024x1024&w=is&k=20&c=WuBXse8zPMp6wg8heu7V96uT3HMUJhwuwpSk8t3wZfs=', 2, 'BELLEZA', 'somos la peluqueria mas gay', '6.244381968590373, -75.55975949037125'),
+(2, 'Clínica Dental Ana', NULL, '', '', 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTv_vYxLTv-SujVdF7ncNrvPvy5GsV2pXPZ6w&s', 4, 'SALUD', 'Servicios dentales de alta calidad', '6.247843715524133, -75.56367957238065'),
+(3, 'Gimnasio Roberto', NULL, '', '', 'https://blog.trainingym.com/hs-fs/hubfs/AdobeStock_174212531%20(1).jpeg?width=999&height=667&name=AdobeStock_174212531%20(1).jpeg', 5, 'FITNESS', 'Equipamiento moderno y entrenadores personales', '6.241886125854007, -75.56786002019788'),
+(4, 'Taller Mecánico Laura', NULL, '', '', 'https://ovaciones.com/wp-content/uploads/2024/03/Daniel-Reza-2024-03-08T084225.822.png', 6, 'AUTOMOTRIZ', 'Reparación y mantenimiento de vehículos', '6.245307844703075, -75.57160940448486'),
+(5, 'Centro de Masajes Carmen', NULL, '', '', 'https://www.flowww.es/hubfs/Q12023%20Marzo/Im%C3%A1genes%20blog/decoracion-negocios-wellness.webp', 1, 'BIENESTAR', 'Masajes terapéuticos y relajantes', '6.252065190092064, -75.56789402731395'),
+(6, 'Peluquería Carlos', NULL, NULL, NULL, 'https://cdn1.treatwell.net/images/view/v2.i11964643.w720.h480.xDC84654A/', 3, 'BELLEZA', 'la mejor barberia de la ciudad', '6.23422139304263, -75.56946590657066');
+
+-- --------------------------------------------------------
 
 --
--- Table structure for table `users`
+-- Estructura de tabla para la tabla `services`
 --
 
-DROP TABLE IF EXISTS `users`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `services` (
+  `id` bigint(20) NOT NULL,
+  `descripcion` varchar(255) DEFAULT NULL,
+  `nombre` varchar(255) DEFAULT NULL,
+  `precio` double DEFAULT NULL,
+  `business_id` bigint(20) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `services`
+--
+
+INSERT INTO `services` (`id`, `descripcion`, `nombre`, `precio`, `business_id`) VALUES
+(4, 'Servicio profesional de peluquería', 'Corte de cabello', 2001, 1),
+(5, 'prueba1', 'prueba1', 20000, 1);
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `users`
+--
+
 CREATE TABLE `users` (
-  `id` int NOT NULL AUTO_INCREMENT,
+  `id` int(11) NOT NULL,
   `nombre` varchar(50) NOT NULL,
   `email` varchar(255) DEFAULT NULL,
   `tipo` varchar(20) NOT NULL,
   `contrasena` varchar(255) DEFAULT NULL,
-  `telefono` varchar(255) DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `email` (`email`)
-) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
+  `telefono` varchar(255) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `users`
+-- Volcado de datos para la tabla `users`
 --
 
-LOCK TABLES `users` WRITE;
-/*!40000 ALTER TABLE `users` DISABLE KEYS */;
-INSERT INTO `users` VALUES (2,'María López','maria@example.com','CLIENTE','password123',NULL),(3,'Carlos Rodríguez','carlos@example.com','NEGOCIO','password123',NULL),(4,'Ana Martínez','ana@example.com','NEGOCIO','password123',NULL),(5,'Roberto Sánchez','roberto@example.com','NEGOCIO','password123',NULL),(6,'Sofía Fernández','sofia@example.com','CLIENTE','password123',NULL),(7,'Miguel Torres','miguel@example.com','CLIENTE','password123',NULL),(8,'Laura Ramírez','laura@example.com','NEGOCIO','password123',NULL),(9,'Pedro Gómez','pedro@example.com','CLIENTE','password123',NULL),(10,'Carmen Díaz','carmen@example.com','NEGOCIO','password123',NULL),(11,'leo','leo@leo.com','NEGOCIO','12345','312');
-/*!40000 ALTER TABLE `users` ENABLE KEYS */;
-UNLOCK TABLES;
-/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+INSERT INTO `users` (`id`, `nombre`, `email`, `tipo`, `contrasena`, `telefono`) VALUES
+(1, 'Masajes Carmen', 'centrodemasajescarmen@correo.com', 'NEGOCIO', '12345', '312'),
+(2, 'peluqueria juanito', 'peluqueriajuanito@example.com', 'NEGOCIO', '12345', '1111111'),
+(3, 'Carlos peluqueria', 'carlospeluqueria@example.com', 'NEGOCIO', '12345', NULL),
+(4, 'clínica dental Ana', 'clinicadentalana@example.com', 'NEGOCIO', '12345', NULL),
+(5, 'Gimnacio Roberto', 'Gimnasioroberto@example.com', 'NEGOCIO', '12345', NULL),
+(6, 'Taller mecani Laura', 'tallerlaura@example.com', 'NEGOCIO', '12345', NULL),
+(7, 'Miguel Torres', 'miguel@example.com', 'CLIENTE', '12345', NULL),
+(9, 'Pedro Gómez', 'pedro@example.com', 'CLIENTE', '12345', NULL),
+(16, 'Jovany', 'jovapg@gmail.com', 'ADMIN', '12345', '3012408505'),
+(17, 'mamadelamama', 'mama@example.com', 'CLIENTE', '12345', '3011111111'),
+(18, 'qaprueba', 'qa@example.com', 'ADMIN', '12345', '3111111111');
 
-/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
-/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
-/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
+--
+-- Índices para tablas volcadas
+--
+
+--
+-- Indices de la tabla `appointments`
+--
+ALTER TABLE `appointments`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_appointments_client` (`id_cliente`),
+  ADD KEY `idx_appointments_business` (`id_negocio`);
+
+--
+-- Indices de la tabla `availability`
+--
+ALTER TABLE `availability`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_availability_business` (`id_negocio`);
+
+--
+-- Indices de la tabla `business`
+--
+ALTER TABLE `business`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indices de la tabla `businesses`
+--
+ALTER TABLE `businesses`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_business_user` (`id_usuario`);
+
+--
+-- Indices de la tabla `services`
+--
+ALTER TABLE `services`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indices de la tabla `users`
+--
+ALTER TABLE `users`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `email` (`email`);
+
+--
+-- AUTO_INCREMENT de las tablas volcadas
+--
+
+--
+-- AUTO_INCREMENT de la tabla `appointments`
+--
+ALTER TABLE `appointments`
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
+
+--
+-- AUTO_INCREMENT de la tabla `availability`
+--
+ALTER TABLE `availability`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=30;
+
+--
+-- AUTO_INCREMENT de la tabla `business`
+--
+ALTER TABLE `business`
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT de la tabla `businesses`
+--
+ALTER TABLE `businesses`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+
+--
+-- AUTO_INCREMENT de la tabla `services`
+--
+ALTER TABLE `services`
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+
+--
+-- AUTO_INCREMENT de la tabla `users`
+--
+ALTER TABLE `users`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
+
+--
+-- Restricciones para tablas volcadas
+--
+
+--
+-- Filtros para la tabla `appointments`
+--
+ALTER TABLE `appointments`
+  ADD CONSTRAINT `appointments_ibfk_1` FOREIGN KEY (`id_cliente`) REFERENCES `users` (`id`),
+  ADD CONSTRAINT `appointments_ibfk_2` FOREIGN KEY (`id_negocio`) REFERENCES `businesses` (`id`);
+
+--
+-- Filtros para la tabla `availability`
+--
+ALTER TABLE `availability`
+  ADD CONSTRAINT `availability_ibfk_1` FOREIGN KEY (`id_negocio`) REFERENCES `businesses` (`id`);
+
+--
+-- Filtros para la tabla `businesses`
+--
+ALTER TABLE `businesses`
+  ADD CONSTRAINT `businesses_ibfk_1` FOREIGN KEY (`id_usuario`) REFERENCES `users` (`id`);
+COMMIT;
+
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
-/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
-
--- Dump completed on 2025-05-20 14:41:11
