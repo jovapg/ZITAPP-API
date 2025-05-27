@@ -56,6 +56,8 @@ public class UsersServicios {
             usuario.setTelefono(datosActualizados.getTelefono());
             usuario.setContrasena(datosActualizados.getContrasena());
             usuario.setTipo(datosActualizados.getTipo());
+            usuario.setEdad(datosActualizados.getEdad());
+            usuario.setImagenPerfil(datosActualizados.getImagenPerfil());
             return usersRepository.save(usuario);
         });
     }

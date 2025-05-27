@@ -16,6 +16,10 @@ public class Users {
     private  String telefono;
     private  String email;
     private  String contrasena;
+    private  short  edad;
+
+    @Column(name = "imagen_perfil")
+    private  String imagenPerfil;
 
     public enum TipoUsuario {
         CLIENTE,
@@ -84,6 +88,22 @@ public class Users {
 
     public void setTipo(TipoUsuario tipo) {
         this.tipo = tipo;
+    }
+
+    public short getEdad() {
+        return edad;
+    }
+
+    public void setEdad(short edad) {
+        this.edad = edad;
+    }
+
+    public String getImagenPerfil() {
+        return imagenPerfil;
+    }
+
+    public void setImagenPerfil(String imagenPerfil) {
+        this.imagenPerfil = imagenPerfil;
     }
 
     @OneToMany(mappedBy = "client", cascade = CascadeType.REMOVE)
