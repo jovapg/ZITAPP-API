@@ -16,6 +16,8 @@ public class BusinnesService {
 
     private Double precio;
 
+    private int duration;
+
     @ManyToOne
     @JoinColumn(name = "business_id", nullable = false)
     @JsonBackReference
@@ -75,5 +77,13 @@ public class BusinnesService {
 
     public void setBusiness(Business business) {
         this.business = business;
+    }
+
+    public int getDuration() {
+        return duration;
+    }
+
+    public void setDuration(int duration) {
+        this.duration = duration;
     }
 }
