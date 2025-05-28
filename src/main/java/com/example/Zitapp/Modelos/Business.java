@@ -30,6 +30,10 @@ public class Business {
     @JsonManagedReference
     private List<BusinnesService> services = new ArrayList<>();
 
+    @OneToMany(mappedBy = "business", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
+    private List<Availability> availabilities = new ArrayList<>();
+
     protected Business() {}
 
     public Business(
@@ -111,6 +115,8 @@ public class Business {
     public void setServices(List<BusinnesService> services) {
         this.services = services;
     }
+
+    public List<Availability> getAvailabilities() {return availabilities;}
 
     // Método de ayuda para agregar un servicio
     public void addService(BusinnesService service) {
