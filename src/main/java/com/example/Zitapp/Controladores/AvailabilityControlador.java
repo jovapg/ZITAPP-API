@@ -12,7 +12,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/availability")
-@CrossOrigin(origins = "*")
+
 public class AvailabilityControlador {
 
     @Autowired

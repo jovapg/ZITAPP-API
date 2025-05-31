@@ -1,6 +1,7 @@
 package com.example.Zitapp.Repositorios;
 
 import com.example.Zitapp.Modelos.Appointments;
+import com.example.Zitapp.Modelos.EstadoCita;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -15,6 +16,11 @@ public interface AppointmentsRepositorio  extends JpaRepository<Appointments,Lon
     List<Appointments> findByClientIdWithService(@Param("clientId") Long clientId);
     List<Appointments> findByBusinessId(Long businessId);
 
+    // En tu AppointmentsRepositorio, agrega este método:
+    List<Appointments> findByBusinessIdAndEstado(Long businessId, EstadoCita estado);
+
+
     // NUEVO: Obtener citas por servicio
     List<Appointments> findByServiceId(Long serviceId);
+
 }
