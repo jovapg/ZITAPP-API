@@ -13,11 +13,8 @@ public class Business {
     private Long id;
 
     private String nombre;
-
     private String categoria;
-
     private String descripcion;
-
     private String direccion;
 
     @Column(name = "imagen_url")
@@ -27,12 +24,17 @@ public class Business {
     private Long idUsuario;
 
     @OneToMany(mappedBy = "business", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference
+    @JsonManagedReference("business-services") // Nombre único para esta relación
     private List<BusinnesService> services = new ArrayList<>();
 
     @OneToMany(mappedBy = "business", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference
+    @JsonManagedReference("business-availabilities") // Nombre único para esta relación
     private List<Availability> availabilities = new ArrayList<>();
+
+    // También podemos incluir appointments si es necesario
+    @OneToMany(mappedBy = "business", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference("business-appointments") // Corresponde con el @JsonBackReference en Appointments
+    private List<Appointments> appointments = new ArrayList<>();
 
     protected Business() {}
 
@@ -52,6 +54,7 @@ public class Business {
         this.idUsuario = idUsuario;
     }
 
+    // Getters y Setters
     public Long getId() {
         return id;
     }
@@ -116,15 +119,28 @@ public class Business {
         this.services = services;
     }
 
-    public List<Availability> getAvailabilities() {return availabilities;}
+    public List<Availability> getAvailabilities() {
+        return availabilities;
+    }
 
-    // Método de ayuda para agregar un servicio
+    public void setAvailabilities(List<Availability> availabilities) {
+        this.availabilities = availabilities;
+    }
+
+    public List<Appointments> getAppointments() {
+        return appointments;
+    }
+
+    public void setAppointments(List<Appointments> appointments) {
+        this.appointments = appointments;
+    }
+
+    // Métodos de ayuda
     public void addService(BusinnesService service) {
         services.add(service);
         service.setBusiness(this);
     }
 
-    // Método de ayuda para eliminar un servicio
     public void removeService(BusinnesService service) {
         services.remove(service);
         service.setBusiness(null);

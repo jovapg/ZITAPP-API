@@ -1,8 +1,7 @@
 package com.example.Zitapp.Modelos;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
-
-
 import java.time.LocalDate;
 import java.time.LocalTime;
 
@@ -13,24 +12,27 @@ public class Appointments {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // Relación Many-to-One con Users (cliente), cambiamos a EAGER
     @ManyToOne(fetch = FetchType.EAGER, optional = false)
     @JoinColumn(name = "id_cliente", nullable = false)
     private Users client;
 
-    // Relación Many-to-One con Business (negocio), cambiamos a EAGER
     @ManyToOne(fetch = FetchType.EAGER, optional = false)
     @JoinColumn(name = "id_negocio", nullable = false)
+    @JsonIgnoreProperties({"services", "availabilities", "appointments"}) // Evita ciclos
     private Business business;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "id_servicio", nullable = false)
+    @JsonIgnoreProperties({"business", "appointments"}) // Evita ciclos
+    private BusinnesService service;
 
     private LocalDate fecha;
     private LocalTime hora;
-    //Guarda este enum como un texto (STRING) en la base de datos,
+
     @Enumerated(EnumType.STRING)
-    private EstadoCita estado; //Pendiente,Confimada,Cancelada
+    private EstadoCita estado;
 
-    //constructores
-
+    // Constructores
     public Appointments() {
     }
 
@@ -42,7 +44,8 @@ public class Appointments {
         this.business = business;
         this.client = client;
     }
-//set && get
+
+    // Getters y Setters
     public Long getId() {
         return id;
     }
@@ -83,7 +86,6 @@ public class Appointments {
         this.business = business;
     }
 
-
     public Users getClient() {
         return client;
     }
@@ -91,9 +93,12 @@ public class Appointments {
     public void setClient(Users client) {
         this.client = client;
     }
+
+    public BusinnesService getService() {
+        return service;
+    }
+
+    public void setService(BusinnesService service) {
+        this.service = service;
+    }
 }
-
-
-
-
-

@@ -1,7 +1,9 @@
 package com.example.Zitapp.Modelos;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "services")
@@ -11,17 +13,18 @@ public class BusinnesService {
     private Long id;
 
     private String nombre;
-
     private String descripcion;
-
     private Double precio;
-
     private int duration;
 
     @ManyToOne
     @JoinColumn(name = "business_id", nullable = false)
-    @JsonBackReference
+    @JsonIgnoreProperties({"services", "availabilities", "appointments"}) // Evita ciclos
     private Business business;
+
+    @OneToMany(mappedBy = "service", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnoreProperties({"service", "business"}) // Evita ciclos - solo muestra info básica de appointments
+    private List<Appointments> appointments = new ArrayList<>();
 
     protected BusinnesService() {}
 
@@ -36,9 +39,11 @@ public class BusinnesService {
         this.nombre = nombre;
         this.descripcion = descripcion;
         this.precio = precio;
+        this.duration = duracion;
         this.business = business;
     }
 
+    // Getters y Setters
     public Long getId() {
         return id;
     }
@@ -85,5 +90,13 @@ public class BusinnesService {
 
     public void setDuration(int duration) {
         this.duration = duration;
+    }
+
+    public List<Appointments> getAppointments() {
+        return appointments;
+    }
+
+    public void setAppointments(List<Appointments> appointments) {
+        this.appointments = appointments;
     }
 }

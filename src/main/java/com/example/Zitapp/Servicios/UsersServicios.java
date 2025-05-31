@@ -76,7 +76,7 @@ public class UsersServicios {
 
     public List<Appointments> obtenerCitasPorUsuario(Long userId) {
         // Asumiendo que tienes un repositorio para las citas
-        return appointmentsRepositorio.findByClientId(userId);
+        return appointmentsRepositorio.findByClientIdWithService(userId);
     }
 
     /**

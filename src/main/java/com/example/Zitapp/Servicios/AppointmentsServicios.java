@@ -110,7 +110,7 @@ public class AppointmentsServicios {
 
     // buscar una cita por cliente
     public List<Appointments> ObtenerCitasPorCliente(Long idCliente) {
-        return appointmentsRepositorio.findByClientId(idCliente);
+        return appointmentsRepositorio.findByClientIdWithService(idCliente);
     }
 
     // buscar una cita por negocio
