@@ -1,15 +1,12 @@
 package com.example.Zitapp.Servicios;
 
-import com.example.Zitapp.Modelos.Appointments;
-import com.example.Zitapp.Modelos.Business;
-import com.example.Zitapp.Modelos.EstadoCita;
-import com.example.Zitapp.Modelos.Users;
+import com.example.Zitapp.Modelos.*;
 import com.example.Zitapp.Repositorios.AppointmentsRepositorio;
 import com.example.Zitapp.Repositorios.BusinessRepositorio;
 import com.example.Zitapp.Repositorios.UsersRepositorio;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
+import com.example.Zitapp.Modelos.Notification.*;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
@@ -17,13 +14,45 @@ import java.util.Optional;
 
 @Service
 public class AppointmentsServicios {
+
     @Autowired
     private AppointmentsRepositorio appointmentsRepositorio;
+
     @Autowired
     private UsersRepositorio usersRepositorio;
 
     @Autowired
     private BusinessRepositorio businessRepositorio;
+
+    @Autowired
+    private NotificationService notificationService;
+
+    private String generarMensajeNotificacion(TipoNotification tipo, Users client, Appointments cita) {
+        switch (tipo) {
+            case CITA_CREADA:
+                return String.format("Nueva cita creada con %s para el día %s a las %s.",
+                        client.getNombre(),
+                        cita.getFecha().toString(),
+                        cita.getHora().toString());
+            case CITA_CANCELADA:
+                return String.format("La cita con %s para el día %s a las %s fue cancelada.",
+                        client.getNombre(),
+                        cita.getFecha().toString(),
+                        cita.getHora().toString());
+            case CITA_CONFIRMADA:
+                return String.format("La cita con %s para el día %s a las %s fue confirmada.",
+                        client.getNombre(),
+                        cita.getFecha().toString(),
+                        cita.getHora().toString());
+            case CITA_FINALIZADA:
+                return String.format("La cita con %s para el día %s a las %s fue finalizada.",
+                        client.getNombre(),
+                        cita.getFecha().toString(),
+                        cita.getHora().toString());
+            default:
+                return "Tienes una nueva notificación.";
+        }
+    }
 
 
     public Appointments CrearCita(Appointments appointments) {
@@ -31,93 +60,167 @@ public class AppointmentsServicios {
             throw new IllegalArgumentException("El cliente o el negocio no pueden ser null");
         }
 
-        // Buscar los objetos completos en la base de datos usando los IDs
         Users client = usersRepositorio.findById(appointments.getClient().getId())
                 .orElseThrow(() -> new RuntimeException("Cliente no encontrado"));
         Business business = businessRepositorio.findById(appointments.getBusiness().getId())
                 .orElseThrow(() -> new RuntimeException("Negocio no encontrado"));
 
-        // Asignar los objetos completos a la cita
         appointments.setClient(client);
         appointments.setBusiness(business);
+        appointments.setEstado(EstadoCita.PENDIENTE);
 
-        // Guardar la cita
-        return appointmentsRepositorio.save(appointments);
+
+        Appointments savedAppointment = appointmentsRepositorio.save(appointments);
+        String mensaje = generarMensajeNotificacion(TipoNotification.CITA_CREADA, client, savedAppointment);
+
+// crear notificacion para el negocio
+        notificationService.crearNotificasion(
+                client.getId(),
+               TipoUsuario.CLIENTE,
+                business.getId(),
+                TipoUsuario.NEGOCIO,
+                mensaje,
+                TipoNotification.CITA_CREADA,
+                savedAppointment.getId()
+
+        );
+
+
+        return savedAppointment;
     }
 
-
-
-    //Comfirmar cita
     public Appointments ConfirmarCita(long idCita) {
         Appointments cita = appointmentsRepositorio.findById(idCita)
                 .orElseThrow(() -> new RuntimeException("Cita no encontrada"));
+
         cita.setEstado(EstadoCita.CONFIRMADA);
-        return appointmentsRepositorio.save(cita);
+        Appointments confirmedAppointment = appointmentsRepositorio.save(cita);
+
+        Users client = cita.getClient();
+        Business business = cita.getBusiness();
+
+        String mensajeCliente = generarMensajeNotificacion(TipoNotification.CITA_CONFIRMADA, client, confirmedAppointment);
+
+        // Notificación solo para el cliente
+        notificationService.crearNotificasion(
+                business.getId(),               // quien envía la notificación (negocio)
+                TipoUsuario.NEGOCIO,
+                client.getId(),                 // quien recibe la notificación (cliente)
+                TipoUsuario.CLIENTE,
+                mensajeCliente,
+                TipoNotification.CITA_CONFIRMADA,
+                confirmedAppointment.getId()
+        );
+
+        return confirmedAppointment;
     }
 
-    //cancelarCita
     public Appointments CancelarCita(long idCita) {
         Appointments cita = appointmentsRepositorio.findById(idCita)
-                .orElseThrow(() -> new RuntimeException("cita no encontrada"));
+                .orElseThrow(() -> new RuntimeException("Cita no encontrada"));
 
         if (cita.getEstado() == EstadoCita.CONFIRMADA || cita.getEstado() == EstadoCita.FINALIZADA) {
             throw new RuntimeException("No se puede cancelar una cita ya confirmada o finalizada.");
         }
 
         cita.setEstado(EstadoCita.CANCELADA);
-        return appointmentsRepositorio.save(cita);  // <- Guarda y ya
+        Appointments cancelledAppointment = appointmentsRepositorio.save(cita);
+        Users client = cita.getClient();
+        Business business = cita.getBusiness();
+
+        String mensajeCliente = generarMensajeNotificacion(TipoNotification.CITA_CANCELADA, client, cancelledAppointment);
+        String mensajeNegocio = generarMensajeNotificacion(TipoNotification.CITA_CANCELADA, client, cancelledAppointment);
+
+        // Notificación para el cliente
+        notificationService.crearNotificasion(
+                business.getId(),
+                TipoUsuario.NEGOCIO,
+                client.getId(),
+                TipoUsuario.CLIENTE,
+                mensajeCliente,
+                TipoNotification.CITA_CANCELADA,
+                cancelledAppointment.getId()
+        );
+
+        // Notificación para el negocio
+        notificationService.crearNotificasion(
+                client.getId(),
+                TipoUsuario.CLIENTE,
+                business.getId(),
+                TipoUsuario.NEGOCIO,
+                mensajeNegocio,
+                TipoNotification.CITA_CANCELADA,
+                cancelledAppointment.getId()
+        );
+
+        return cancelledAppointment;
     }
 
-    //finalizarCita
     public Appointments FinalizarCita(long idCita) {
         Appointments cita = appointmentsRepositorio.findById(idCita)
-                .orElseThrow(() -> new RuntimeException("cita no encontrada"));
+                .orElseThrow(() -> new RuntimeException("Cita no encontrada"));
 
         cita.setEstado(EstadoCita.FINALIZADA);
+        Appointments finalizedAppointment = appointmentsRepositorio.save(cita);
 
-        return appointmentsRepositorio.save(cita);
+        Users client = cita.getClient();
+        Business business = cita.getBusiness();
 
+        String mensajeCliente = generarMensajeNotificacion(TipoNotification.CITA_FINALIZADA, client, finalizedAppointment);
+
+        // Notificar solo al cliente que la cita fue finalizada
+        notificationService.crearNotificasion(
+                business.getId(),               // emisor (negocio)
+                TipoUsuario.NEGOCIO,
+                client.getId(),                 // receptor (cliente)
+                TipoUsuario.CLIENTE,
+                mensajeCliente,
+                TipoNotification.CITA_FINALIZADA,
+                finalizedAppointment.getId()
+        );
+
+        return finalizedAppointment;
     }
 
-    //editarcita
-    public Appointments EditarCita(Long idcita, LocalDate NuevaFecha, LocalTime NuevaHoras) {
-        Appointments cita = appointmentsRepositorio.findById(idcita)
-                .orElseThrow(() -> new RuntimeException("cita no encontrada"));
-        //validar si el estado actual  permita editarlo
+
+    public Appointments EditarCita(Long idCita, LocalDate nuevaFecha, LocalTime nuevaHora) {
+        Appointments cita = appointmentsRepositorio.findById(idCita)
+                .orElseThrow(() -> new RuntimeException("Cita no encontrada"));
+
         if (cita.getEstado() == EstadoCita.CONFIRMADA || cita.getEstado() == EstadoCita.FINALIZADA) {
-            throw new RuntimeException("\"No se puede cancelar una cita ya confirmada o finalizada.");
+            throw new RuntimeException("No se puede editar una cita ya confirmada o finalizada.");
         }
 
-        //editar valores
-        cita.setFecha(NuevaFecha);
-        cita.setHora(NuevaHoras);
-        cita.setEstado(EstadoCita.CONFIRMADA);//puedes dajar el mismo  estado si prefieres
-        return appointmentsRepositorio.save(cita);
+        cita.setFecha(nuevaFecha);
+        cita.setHora(nuevaHora);
+        cita.setEstado(EstadoCita.PENDIENTE);
+
+        Appointments editedAppointment = appointmentsRepositorio.save(cita);
+
+
+
+        return editedAppointment;
     }
 
-    // buscar todas citas
     public List<Appointments> ObtenerCitas() {
         return appointmentsRepositorio.findAll();
     }
 
-    // buscar una cita
-    public Optional<Appointments> ObtenerCita(Long idcita) {
-        return appointmentsRepositorio.findById(idcita);  // Esto devuelve un Optional
+    public Optional<Appointments> ObtenerCita(Long idCita) {
+        return appointmentsRepositorio.findById(idCita);
     }
 
-
-
-
-    // buscar una cita por cliente
     public List<Appointments> ObtenerCitasPorCliente(Long idCliente) {
         return appointmentsRepositorio.findByClientId(idCliente);
     }
 
-    // buscar una cita por negocio
     public List<Appointments> ObtenerCitasPorNegocio(Long idNegocio) {
         return appointmentsRepositorio.findByBusinessId(idNegocio);
     }
 
+    public List<Appointments> ObtenerCitasPendientesPorNegocio(Long idNegocio) {
+        return appointmentsRepositorio.findByBusinessIdAndEstado(idNegocio, EstadoCita.PENDIENTE);
+    }
 
     public void EliminarCita(Long id) throws Exception {
         Optional<Appointments> cita = appointmentsRepositorio.findById(id);
@@ -127,5 +230,4 @@ public class AppointmentsServicios {
             throw new Exception("La cita con ID " + id + " no existe.");
         }
     }
-
 }
