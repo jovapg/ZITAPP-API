@@ -1,5 +1,6 @@
 package com.example.Zitapp.Modelos;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -18,7 +19,13 @@ public class Appointments {
 
     @ManyToOne(fetch = FetchType.EAGER, optional = false)
     @JoinColumn(name = "id_negocio", nullable = false)
+    @JsonIgnoreProperties({"services", "availabilities", "appointments"})
     private Business business;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "id_servicio", nullable = false)
+    @JsonIgnoreProperties({"business", "appointments"})
+    private BusinnesService service;
 
     private LocalDate fecha;
     private LocalTime hora;
@@ -26,9 +33,8 @@ public class Appointments {
     @Enumerated(EnumType.STRING)
     private EstadoCita estado;
 
-    // Constructores existentes...
-    public Appointments() {
-    }
+    // Constructores
+    public Appointments() {}
 
     public Appointments(Long id, EstadoCita estado, LocalTime hora, LocalDate fecha, Business business, Users client) {
         this.id = id;
@@ -39,7 +45,7 @@ public class Appointments {
         this.client = client;
     }
 
-    // AGREGAR ESTE MÉTODO HELPER
+    // Helper para obtener LocalDateTime
     public LocalDateTime getDateTime() {
         if (fecha != null && hora != null) {
             return LocalDateTime.of(fecha, hora);
@@ -47,7 +53,7 @@ public class Appointments {
         return null;
     }
 
-    // Todos tus getters y setters existentes...
+    // Getters y setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
@@ -65,4 +71,7 @@ public class Appointments {
 
     public Users getClient() { return client; }
     public void setClient(Users client) { this.client = client; }
+
+    public BusinnesService getService() { return service; }
+    public void setService(BusinnesService service) { this.service = service; }
 }

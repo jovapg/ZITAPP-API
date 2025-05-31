@@ -211,7 +211,7 @@ public class AppointmentsServicios {
     }
 
     public List<Appointments> ObtenerCitasPorCliente(Long idCliente) {
-        return appointmentsRepositorio.findByClientId(idCliente);
+        return appointmentsRepositorio.findByClientIdWithService(idCliente);
     }
 
     public List<Appointments> ObtenerCitasPorNegocio(Long idNegocio) {
