@@ -30,6 +30,12 @@
 		<java.version>17</java.version>
 	</properties>
 	<dependencies>
+		<!-- Swagger - SpringDoc OpenAPI UI -->
+		<dependency>
+			<groupId>org.springdoc</groupId>
+			<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+			<version>2.5.0</version> <!-- Ajusta la versión si usas Spring Boot 3 -->
+		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-jpa</artifactId>
