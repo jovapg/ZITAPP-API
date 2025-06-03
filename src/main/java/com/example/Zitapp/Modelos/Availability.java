@@ -1,5 +1,6 @@
 package com.example.Zitapp.Modelos;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 
 import java.time.LocalTime;
@@ -11,9 +12,6 @@ public class Availability {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
-
-    @Column(name = "id_negocio", nullable = false)
-    private Integer idNegocio;
 
     @Column(name = "día", nullable = false)
     private String dia;
@@ -28,12 +26,17 @@ public class Availability {
     public Availability() {
     }
 
-    public Availability(Integer idNegocio, String dia, LocalTime horaInicio, LocalTime horaFin) {
-        this.idNegocio = idNegocio;
+    public Availability(Business business, String dia, LocalTime horaInicio, LocalTime horaFin) {
+        this.business = business;
         this.dia = dia;
         this.horaInicio = horaInicio;
         this.horaFin = horaFin;
     }
+
+    @ManyToOne
+    @JoinColumn(name = "id_negocio", nullable = false)
+    @JsonBackReference
+    private Business business;
 
     // Getters y Setters
     public Integer getId() {
@@ -42,14 +45,6 @@ public class Availability {
 
     public void setId(Integer id) {
         this.id = id;
-    }
-
-    public Integer getIdNegocio() {
-        return idNegocio;
-    }
-
-    public void setIdNegocio(Integer idNegocio) {
-        this.idNegocio = idNegocio;
     }
 
     public String getDia() {
@@ -74,6 +69,14 @@ public class Availability {
 
     public void setHoraFin(LocalTime horaFin) {
         this.horaFin = horaFin;
+    }
+
+    public Business getBusiness() {
+        return business;
+    }
+
+    public void setBusiness(Business business) {
+        this.business = business;
     }
 }
 

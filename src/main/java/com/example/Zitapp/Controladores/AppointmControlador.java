@@ -13,7 +13,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/Appointments")
-@CrossOrigin(origins = "*", allowedHeaders = "*")
+
 public class AppointmControlador {
     @Autowired
     private AppointmentsServicios appointmentsServicios;
@@ -127,14 +127,17 @@ public class AppointmControlador {
                     .body("Error al obtener la cita: " + e.getMessage());
         }
     }
-
-    @GetMapping("/test")
-    public ResponseEntity<?> test() {
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> eliminarCita(@PathVariable Long id) {
         try {
-            return ResponseEntity.ok("Prueba exitosa");
+            appointmentsServicios.EliminarCita(id); // Asegúrate de tener esta función en el servicio
+            return ResponseEntity.ok("Cita eliminada exitosamente.");
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Error en la prueba: " + e.getMessage());
+                    .body("Error al eliminar la cita: " + e.getMessage());
         }
     }
+
+
+
 }

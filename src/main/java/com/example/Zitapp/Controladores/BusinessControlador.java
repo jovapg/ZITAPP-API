@@ -13,7 +13,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/business")
-@CrossOrigin(origins = "*")
+
 public class BusinessControlador {
 
     @Autowired
@@ -117,4 +117,24 @@ public class BusinessControlador {
                     HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<?> obtenerBusinessPorUserId(@PathVariable("userId") Long userId) {
+        Optional<Business> businessOpt = businessServicio.getByUserId(userId);
+
+        if (businessOpt.isPresent()) {
+            Business negocio = businessOpt.get();
+
+            // 🔥 Limpias las listas para evitar problemas de serialización
+            negocio.setServices(new ArrayList<>());
+            negocio.setAvailabilities(new ArrayList<>());
+            negocio.setAppointments(new ArrayList<>());
+
+            return new ResponseEntity<>(negocio, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>("No se encontró un negocio con ese usuario", HttpStatus.NOT_FOUND);
+        }
+    }
+
+
 }

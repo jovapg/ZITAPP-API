@@ -20,7 +20,7 @@ import java.util.*;
  */
 @RestController
 @RequestMapping("/api/users")
-@CrossOrigin(origins = "*")
+
 public class UsersControlador {
 
     private static final Logger logger = LoggerFactory.getLogger(UsersControlador.class);
@@ -301,5 +301,8 @@ public class UsersControlador {
                     .status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Collections.singletonMap("error", "Error al procesar la solicitud: " + e.getMessage()));
         }
+
     }
+
+
 }

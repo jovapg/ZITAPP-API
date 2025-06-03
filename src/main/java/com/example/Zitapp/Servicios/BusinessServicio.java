@@ -43,4 +43,9 @@ public class BusinessServicio {
             return true;
         }).orElse(false);
     }
+
+    public Optional<Business> getByUserId(Long userId) {
+        return businessRepositorio.findByIdUsuario(userId);
+    }
+
 }

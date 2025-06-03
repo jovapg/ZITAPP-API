@@ -59,6 +59,7 @@ public class BusinessServiceServicio {
             serviceExistente.setNombre(serviceDetails.getNombre());
             serviceExistente.setDescripcion(serviceDetails.getDescripcion());
             serviceExistente.setPrecio(serviceDetails.getPrecio());
+            serviceExistente.setDuration(serviceDetails.getDuration());
 
             return serviceRepositorio.save(serviceExistente);
         } else {

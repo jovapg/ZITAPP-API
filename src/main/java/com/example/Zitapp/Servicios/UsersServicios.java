@@ -56,6 +56,8 @@ public class UsersServicios {
             usuario.setTelefono(datosActualizados.getTelefono());
             usuario.setContrasena(datosActualizados.getContrasena());
             usuario.setTipo(datosActualizados.getTipo());
+            usuario.setEdad(datosActualizados.getEdad());
+            usuario.setImagenPerfil(datosActualizados.getImagenPerfil());
             return usersRepository.save(usuario);
         });
     }
@@ -74,7 +76,7 @@ public class UsersServicios {
 
     public List<Appointments> obtenerCitasPorUsuario(Long userId) {
         // Asumiendo que tienes un repositorio para las citas
-        return appointmentsRepositorio.findByClientId(userId);
+        return appointmentsRepositorio.findByClientIdWithService(userId);
     }
 
     /**

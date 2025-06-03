@@ -12,7 +12,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/services")
-@CrossOrigin(origins = "*")
+
 public class BusinessServiceControlador {
 
     private final BusinessServiceServicio serviceServicio;

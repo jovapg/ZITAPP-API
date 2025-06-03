@@ -12,17 +12,18 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/availability")
-@CrossOrigin(origins = "*")
+
 public class AvailabilityControlador {
 
     @Autowired
     private AvailabilityServicio availabilityServicio;
 
     // Crear disponibilidad
-    @PostMapping // http://localhost:8081/api/availability
-    public ResponseEntity<?> crearDisponibilidad(@RequestBody Availability disponibilidad) {
+    // http://localhost:8081/api/availability
+    @PostMapping("/{businessId}")
+    public ResponseEntity<Object> crearDisponibilidad(@RequestBody Availability disponibilidad, @PathVariable Long businessId) {
         try {
-            Availability nueva = availabilityServicio.crearDisponibilidad(disponibilidad);
+            Availability nueva = availabilityServicio.crearDisponibilidad(disponibilidad, businessId);
             return ResponseEntity.ok(nueva);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -59,9 +60,8 @@ public class AvailabilityControlador {
     @PutMapping("/{id}") // http://localhost:8081/api/availability/{id}
     public ResponseEntity<?> actualizar(@PathVariable Integer id, @RequestBody Availability datosActualizados) {
         try {
-            return availabilityServicio.actualizarDisponibilidad(id, datosActualizados)
-                    .map(ResponseEntity::ok)
-                    .orElse(ResponseEntity.notFound().build());
+            Availability availability = availabilityServicio.actualizarDisponibilidad(id, datosActualizados);
+            return new ResponseEntity<>(availability, HttpStatus.OK);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Error al actualizar disponibilidad con ID " + id + ": " + e.getMessage());
