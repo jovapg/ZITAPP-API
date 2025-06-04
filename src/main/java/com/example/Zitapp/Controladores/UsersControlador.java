@@ -145,6 +145,7 @@ public class UsersControlador {
      * @param dtoActualizado DTO con los datos nuevos
      * @return usuario actualizado o error 404 si no existe
      */
+
     @Operation(summary = "Actualizar usuario por ID")
     @ApiResponse(responseCode = "404", description = "Usuario no encontrado para actualizar")
     @PutMapping("/{id}")
@@ -155,6 +156,7 @@ public class UsersControlador {
             return ResponseEntity.ok(convertirADTO(usuarioOpt.get()));
         } else {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Usuario no encontrado para actualizar");
+
         }
     }
 

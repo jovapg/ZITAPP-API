@@ -43,11 +43,14 @@ public class BusinessServiceControlador {
         }
     }
 
-    @Operation(summary = "Obtener todos los servicios de un negocio")
+
+  @Operation(summary = "Obtener todos los servicios de un negocio")
+
     @GetMapping("/businesses/{businessId}/services")
     public ResponseEntity<List<BusinnesService>> obtenerPorNegocio(@PathVariable Long businessId) {
         return ResponseEntity.ok(serviceServicio.obtenerServiciosPorNegocioId(businessId));
     }
+
     @Operation(summary = "Crear un servicio para un negocio usando parámetros en URL")
     @PostMapping(value = "/businesses/{businessId}/from-params")
     public ResponseEntity<?> crearDesdeParams(
@@ -61,6 +64,7 @@ public class BusinessServiceControlador {
             @RequestParam Double precio,
             @Parameter(description = "Duración del servicio en minutos", example = "60")
             @RequestParam int duracion) {
+
         try {
             BusinnesService service = new BusinnesService();
             service.setNombre(nombre);
@@ -74,7 +78,9 @@ public class BusinessServiceControlador {
         }
     }
 
+
     @Operation(summary = "Actualizar un servicio existente")
+
     @PutMapping("/{id}")
     public ResponseEntity<?> actualizar(@PathVariable Long id, @RequestBody BusinnesServiceDTO detalles) {
         try {
@@ -85,7 +91,10 @@ public class BusinessServiceControlador {
     }
 
 
+
     @Operation(summary = "Eliminar un servicio por ID")
+
+
     @DeleteMapping("/{id}")
     public ResponseEntity<String> eliminar(@PathVariable Long id) {
         try {
