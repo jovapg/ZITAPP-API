@@ -5,18 +5,31 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;
 
-public interface UsersRepositorio  extends  JpaRepository<Users, Long>{
+/**
+ * Repositorio JPA para la entidad Users.
+ * Proporciona métodos para realizar operaciones CRUD y consultas personalizadas.
+ */
+public interface UsersRepositorio extends JpaRepository<Users, Long> {
+
     /**
-     * Encuentra un usuario por su email
-     * @param email el email del usuario a buscar
-     * @return Optional con el usuario si existe
+     * Busca un usuario por su email.
+     * @param email email del usuario a buscar.
+     * @return Optional con el usuario si se encuentra, o vacío si no existe.
      */
     Optional<Users> findByEmail(String email);
 
-    Optional<Object> findByNombre(String nombre);
+    /**
+     * Busca un usuario por su nombre.
+     * @param nombre nombre del usuario a buscar.
+     * @return Optional con el usuario si se encuentra, o vacío si no existe.
+     */
+    Optional<Users> findByNombre(String nombre);
 
-    Optional<Object> findByTelefono(String telefono);
+    /**
+     * Busca un usuario por su teléfono.
+     * @param telefono teléfono del usuario a buscar.
+     * @return Optional con el usuario si se encuentra, o vacío si no existe.
+     */
+    Optional<Users> findByTelefono(String telefono);
+
 }
-
-
-

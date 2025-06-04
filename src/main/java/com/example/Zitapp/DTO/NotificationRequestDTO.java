@@ -1,4 +1,4 @@
-package com.example.Zitapp.Modelos;
+package com.example.Zitapp.DTO;
  import  com.example.Zitapp.Modelos.Notification.TipoUsuario;
  import  com.example.Zitapp.Modelos.Notification.TipoNotification;
 public class NotificationRequestDTO {

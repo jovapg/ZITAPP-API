@@ -1,49 +1,52 @@
 package com.example.Zitapp.Modelos;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
-import java.util.ArrayList;
-import java.util.List;
 
+/**
+ * Entidad que representa un servicio ofrecido por un negocio.
+ */
 @Entity
 @Table(name = "services")
 public class BusinnesService {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Schema(description = "ID único del servicio", example = "1")
     private Long id;
 
+    @Schema(description = "Nombre del servicio", example = "Corte de cabello")
     private String nombre;
-    private String descripcion;
-    private Double precio;
-    private int duration;
 
-    @ManyToOne
-    @JoinColumn(name = "business_id", nullable = false)
-    @JsonIgnoreProperties({"services", "availabilities", "appointments"}) // Evita ciclos
+    @Schema(description = "Descripción del servicio", example = "Corte con máquina y tijeras")
+    private String descripcion;
+
+    @Schema(description = "Precio del servicio", example = "15000")
+    private Double precio;
+
+    @Schema(description = "Duración del servicio en minutos", example = "30")
+    private int duracion; // <- ✅ Este es el campo que faltaba
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "business_id")
+    @JsonBackReference("business-services")
+    @Schema(description = "Negocio al que pertenece este servicio")
     private Business business;
 
-    @OneToMany(mappedBy = "service", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonIgnoreProperties({"service", "business"}) // Evita ciclos - solo muestra info básica de appointments
-    private List<Appointments> appointments = new ArrayList<>();
+    // Constructor vacío para JPA
+    public BusinnesService() {}
 
-    protected BusinnesService() {}
-
-    public BusinnesService(
-            String nombre,
-            String descripcion,
-            Double precio,
-            Integer duracion,
-            String imagenUrl,
-            Business business
-    ) {
+    // Constructor con todos los campos (excepto ID)
+    public BusinnesService(String nombre, String descripcion, Double precio, int duracion, Business business) {
         this.nombre = nombre;
         this.descripcion = descripcion;
         this.precio = precio;
-        this.duration = duracion;
+        this.duracion = duracion;
         this.business = business;
     }
 
-    // Getters y Setters
+    // Getters y setters
     public Long getId() {
         return id;
     }
@@ -76,27 +79,19 @@ public class BusinnesService {
         this.precio = precio;
     }
 
+    public int getDuracion() {
+        return duracion;
+    }
+
+    public void setDuracion(int duracion) {
+        this.duracion = duracion;
+    }
+
     public Business getBusiness() {
         return business;
     }
 
     public void setBusiness(Business business) {
         this.business = business;
-    }
-
-    public int getDuration() {
-        return duration;
-    }
-
-    public void setDuration(int duration) {
-        this.duration = duration;
-    }
-
-    public List<Appointments> getAppointments() {
-        return appointments;
-    }
-
-    public void setAppointments(List<Appointments> appointments) {
-        this.appointments = appointments;
     }
 }
