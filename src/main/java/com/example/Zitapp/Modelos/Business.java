@@ -5,9 +5,13 @@ import jakarta.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Entidad que representa un negocio.
+ */
 @Entity
 @Table(name = "businesses")
 public class Business {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -24,28 +28,23 @@ public class Business {
     private Long idUsuario;
 
     @OneToMany(mappedBy = "business", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference("business-services") // Nombre único para esta relación
+    @JsonManagedReference("business-services")
     private List<BusinnesService> services = new ArrayList<>();
 
     @OneToMany(mappedBy = "business", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference("business-availabilities") // Nombre único para esta relación
+    @JsonManagedReference("business-availabilities")
     private List<Availability> availabilities = new ArrayList<>();
 
-    // También podemos incluir appointments si es necesario
     @OneToMany(mappedBy = "business", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference("business-appointments") // Corresponde con el @JsonBackReference en Appointments
+    @JsonManagedReference("business-appointments")
     private List<Appointments> appointments = new ArrayList<>();
 
-    protected Business() {}
+    // Constructor vacío requerido por JPA
+    public Business() {}
 
-    public Business(
-            String nombre,
-            String categoria,
-            String descripcion,
-            String direccion,
-            String imagenUrl,
-            Long idUsuario
-    ) {
+    // Constructor para crear una instancia con datos
+    public Business(String nombre, String categoria, String descripcion, String direccion,
+                    String imagenUrl, Long idUsuario) {
         this.nombre = nombre;
         this.categoria = categoria;
         this.descripcion = descripcion;
@@ -54,7 +53,7 @@ public class Business {
         this.idUsuario = idUsuario;
     }
 
-    // Getters y Setters
+    // Getters y setters
     public Long getId() {
         return id;
     }
@@ -135,7 +134,7 @@ public class Business {
         this.appointments = appointments;
     }
 
-    // Métodos de ayuda
+    // Métodos auxiliares para manejo bidireccional
     public void addService(BusinnesService service) {
         services.add(service);
         service.setBusiness(this);

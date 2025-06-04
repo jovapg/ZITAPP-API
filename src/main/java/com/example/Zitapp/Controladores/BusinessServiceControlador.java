@@ -1,18 +1,22 @@
 package com.example.Zitapp.Controladores;
 
+import com.example.Zitapp.DTO.BusinnesServiceDTO;
 import com.example.Zitapp.Modelos.BusinnesService;
 import com.example.Zitapp.Servicios.BusinessServiceServicio;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/services")
-
+@Tag(name = "Servicios", description = "CRUD de servicios ofrecidos por los negocios")
 public class BusinessServiceControlador {
 
     private final BusinessServiceServicio serviceServicio;
@@ -22,143 +26,103 @@ public class BusinessServiceControlador {
         this.serviceServicio = serviceServicio;
     }
 
-    // Obtener todos los servicios
+    @Operation(summary = "Obtener todos los servicios")
     @GetMapping("/")
-    public ResponseEntity<Object> obtenerTodosLosServicios() {
-        try {
-            List<BusinnesService> servicios = serviceServicio.obtenerTodosLosServicios();
-            return new ResponseEntity<>(servicios, HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>(
-                    "Error al obtener servicios: " + e.getMessage(),
-                    HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+    public ResponseEntity<List<BusinnesService>> obtenerTodos() {
+        return ResponseEntity.ok(serviceServicio.obtenerTodosLosServicios());
     }
 
-    // Obtener un servicio por ID
+    @Operation(summary = "Obtener un servicio por su ID")
     @GetMapping("/{id}")
-    public ResponseEntity<Object> obtenerServicioPorId(@PathVariable Long id) {
-        try {
-            Optional<BusinnesService> servicio = serviceServicio.obtenerServicioPorId(id);
-
-            if (servicio.isPresent()) {
-                return new ResponseEntity<>(servicio.get(), HttpStatus.OK);
-            } else {
-                return new ResponseEntity<>("Servicio no encontrado con ID: " + id, HttpStatus.NOT_FOUND);
-            }
-        } catch (Exception e) {
-            return new ResponseEntity<>(
-                    "Error al obtener servicio: " + e.getMessage(),
-                    HttpStatus.INTERNAL_SERVER_ERROR);
+    public ResponseEntity<?> obtenerPorId(@PathVariable Long id) {
+        Optional<BusinnesService> servicio = serviceServicio.obtenerServicioPorId(id);
+        if (servicio.isPresent()) {
+            return ResponseEntity.ok(servicio.get());
+        } else {
+            return ResponseEntity.status(404).body(null);
         }
     }
 
-    // Obtener servicios por ID de negocio
 
-    //http://localhost:8081/api/services/businesses/1/services
-
+  @Operation(summary = "Obtener todos los servicios de un negocio")
 
     @GetMapping("/businesses/{businessId}/services")
-    public ResponseEntity<Object> obtenerServiciosPorNegocioId(@PathVariable Long businessId) {
-        try {
-            List<BusinnesService> servicios = serviceServicio.obtenerServiciosPorNegocioId(businessId);
-            return new ResponseEntity<>(servicios, HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>(
-                    "Error al obtener servicios del negocio: " + e.getMessage(),
-                    HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+    public ResponseEntity<List<BusinnesService>> obtenerPorNegocio(@PathVariable Long businessId) {
+        return ResponseEntity.ok(serviceServicio.obtenerServiciosPorNegocioId(businessId));
     }
 
-    // Crear un nuevo servicio asociado a un negocio
+    @Operation(summary = "Crear un servicio para un negocio usando parámetros en URL")
+    @PostMapping(value = "/businesses/{businessId}/from-params")
+    public ResponseEntity<?> crearDesdeParams(
+            @Parameter(description = "ID del negocio", example = "1")
+            @PathVariable Long businessId,
+            @Parameter(description = "Nombre del servicio", example = "Masaje relajante")
+            @RequestParam String nombre,
+            @Parameter(description = "Descripción del servicio", example = "Masaje completo de cuerpo")
+            @RequestParam String descripcion,
+            @Parameter(description = "Precio del servicio", example = "45000")
+            @RequestParam Double precio,
+            @Parameter(description = "Duración del servicio en minutos", example = "60")
+            @RequestParam int duracion) {
 
-    //http://localhost:8081/api/services/businesses/1
-    // JSON para creacion
-    // {
-    //      "nombre": "Mantenimiento",
-    //      "descripcion": "Mantenimiento",
-    //      "precio": 20.000
-    //}
-
-
-    @PostMapping("/businesses/{businessId}")
-    public ResponseEntity<Object> crearServicio(@PathVariable Long businessId, @RequestBody BusinnesService service) {
         try {
-            BusinnesService nuevoServicio = serviceServicio.crearServicio(service, businessId);
-            return new ResponseEntity<>(nuevoServicio, HttpStatus.CREATED);
+            BusinnesService service = new BusinnesService();
+            service.setNombre(nombre);
+            service.setDescripcion(descripcion);
+            service.setPrecio(precio);
+            service.setDuracion(duracion);
+
+            return ResponseEntity.status(201).body(serviceServicio.crearServicio(service, businessId));
         } catch (RuntimeException e) {
-            return new ResponseEntity<>("Error al crear servicio: " + e.getMessage(), HttpStatus.NOT_FOUND);
-        } catch (Exception e) {
-            return new ResponseEntity<>(
-                    "Error interno al crear servicio: " + e.getMessage(),
-                    HttpStatus.INTERNAL_SERVER_ERROR);
+            return ResponseEntity.status(404).body(e.getMessage());
         }
     }
 
-    // Actualizar un servicio existente
 
-    //http://localhost:8081/api/services/1
+    @Operation(summary = "Actualizar un servicio existente")
 
     @PutMapping("/{id}")
-    public ResponseEntity<Object> actualizarServicio(@PathVariable Long id, @RequestBody BusinnesService serviceDetails) {
+    public ResponseEntity<?> actualizar(@PathVariable Long id, @RequestBody BusinnesServiceDTO detalles) {
         try {
-            BusinnesService servicioActualizado = serviceServicio.actualizarServicio(id, serviceDetails);
-            return new ResponseEntity<>(servicioActualizado, HttpStatus.OK);
+            return ResponseEntity.ok(serviceServicio.actualizarServicio(id, detalles));
         } catch (RuntimeException e) {
-            return new ResponseEntity<>("Error al actualizar servicio: " + e.getMessage(), HttpStatus.NOT_FOUND);
-        } catch (Exception e) {
-            return new ResponseEntity<>(
-                    "Error interno al actualizar servicio: " + e.getMessage(),
-                    HttpStatus.INTERNAL_SERVER_ERROR);
+            return ResponseEntity.status(404).body(e.getMessage());
         }
     }
 
-    // Eliminar un servicio
 
-    //http://localhost:8081/api/services/1
+
+    @Operation(summary = "Eliminar un servicio por ID")
+
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Object> eliminarServicio(@PathVariable Long id) {
+    public ResponseEntity<String> eliminar(@PathVariable Long id) {
         try {
             serviceServicio.eliminarServicio(id);
-            return new ResponseEntity<>("Servicio eliminado correctamente", HttpStatus.OK);
+            return ResponseEntity.ok("Servicio eliminado correctamente");
         } catch (RuntimeException e) {
-            return new ResponseEntity<>("Error al eliminar servicio: " + e.getMessage(), HttpStatus.NOT_FOUND);
-        } catch (Exception e) {
-            return new ResponseEntity<>(
-                    "Error interno al eliminar servicio: " + e.getMessage(),
-                    HttpStatus.INTERNAL_SERVER_ERROR);
+            return ResponseEntity.status(404).body(e.getMessage());
         }
     }
 
-    // Buscar servicios por rango de precios
+    @Operation(summary = "Buscar servicios por rango de precio")
     @GetMapping("/businesses/{businessId}/services/search/by-price-range")
-    public ResponseEntity<Object> buscarServiciosPorRangoDePrecio(
-            @PathVariable Long businessId,
-            @RequestParam Double min,
-            @RequestParam Double max) {
-        try {
-            List<BusinnesService> servicios = serviceServicio.buscarServiciosPorRangoDePrecio(businessId, min, max);
-            return new ResponseEntity<>(servicios, HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>(
-                    "Error al buscar servicios por rango de precio: " + e.getMessage(),
-                    HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+    public ResponseEntity<List<BusinnesService>> buscarPorPrecio(@PathVariable Long businessId,
+                                                                 @RequestParam Double min,
+                                                                 @RequestParam Double max) {
+        return ResponseEntity.ok(serviceServicio.buscarServiciosPorRangoDePrecio(businessId, min, max));
     }
 
-    // Buscar servicios por nombre
+    @Operation(summary = "Buscar servicios por nombre")
     @GetMapping("/businesses/{businessId}/services/search/by-name")
-    public ResponseEntity<Object> buscarServiciosPorNombre(
-            @PathVariable Long businessId,
-            @RequestParam String nombre) {
-        try {
-            List<BusinnesService> servicios = serviceServicio.buscarServiciosPorNombre(businessId, nombre);
-            return new ResponseEntity<>(servicios, HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>(
-                    "Error al buscar servicios por nombre: " + e.getMessage(),
-                    HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+    public ResponseEntity<List<BusinnesService>> buscarPorNombre(@PathVariable Long businessId,
+                                                                 @RequestParam String nombre) {
+        return ResponseEntity.ok(serviceServicio.buscarServiciosPorNombre(businessId, nombre));
+    }
+
+    // Endpoint de prueba
+    @PostMapping("/test-json")
+    public ResponseEntity<String> testJson(@RequestBody Map<String, Object> data) {
+        return ResponseEntity.ok("Funcionó: " + data.toString());
     }
 }

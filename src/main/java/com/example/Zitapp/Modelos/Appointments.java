@@ -1,5 +1,6 @@
 package com.example.Zitapp.Modelos;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import java.time.LocalDate;
@@ -15,17 +16,21 @@ public class Appointments {
 
     @ManyToOne(fetch = FetchType.EAGER, optional = false)
     @JoinColumn(name = "id_cliente", nullable = false)
+    @JsonBackReference("user-appointments")
     private Users client;
+
 
     @ManyToOne(fetch = FetchType.EAGER, optional = false)
     @JoinColumn(name = "id_negocio", nullable = false)
-    @JsonIgnoreProperties({"services", "availabilities", "appointments"})
+    @JsonBackReference("business-appointments")  // Referencia inversa a @JsonManagedReference
     private Business business;
+
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "id_servicio", nullable = false)
     @JsonIgnoreProperties({"business", "appointments"})
     private BusinnesService service;
+
 
     private LocalDate fecha;
     private LocalTime hora;

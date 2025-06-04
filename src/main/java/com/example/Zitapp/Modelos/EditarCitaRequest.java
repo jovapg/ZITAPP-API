@@ -1,13 +1,16 @@
 package com.example.Zitapp.Modelos;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
 public class EditarCitaRequest {
-    private LocalDate nuevaFecha;
-    private LocalTime nuevaHora;
 
-    // Getters y Setters
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    private LocalDate nuevaFecha;
+
+    @JsonFormat(pattern = "HH:mm:ss")
+    private LocalTime nuevaHora;
 
     public LocalDate getNuevaFecha() {
         return nuevaFecha;
@@ -25,4 +28,3 @@ public class EditarCitaRequest {
         this.nuevaHora = nuevaHora;
     }
 }
-

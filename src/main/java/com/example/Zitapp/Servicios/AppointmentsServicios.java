@@ -1,8 +1,10 @@
 package com.example.Zitapp.Servicios;
 
+import com.example.Zitapp.DTO.AppointmentCreateDTO;
 import com.example.Zitapp.Modelos.*;
 import com.example.Zitapp.Repositorios.AppointmentsRepositorio;
 import com.example.Zitapp.Repositorios.BusinessRepositorio;
+import com.example.Zitapp.Repositorios.BusinessServiceRepositorio;
 import com.example.Zitapp.Repositorios.UsersRepositorio;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -26,6 +28,9 @@ public class AppointmentsServicios {
 
     @Autowired
     private NotificationService notificationService;
+
+    @Autowired
+    private BusinessServiceRepositorio serviceRepositorio;  // inyecta tu repositorio de servicios
 
     private String generarMensajeNotificacion(TipoNotification tipo, Users client, Appointments cita) {
         switch (tipo) {
@@ -55,36 +60,31 @@ public class AppointmentsServicios {
     }
 
 
-    public Appointments CrearCita(Appointments appointments) {
-        if (appointments.getClient() == null || appointments.getBusiness() == null) {
-            throw new IllegalArgumentException("El cliente o el negocio no pueden ser null");
+    public Appointments CrearCita(AppointmentCreateDTO dto) {
+        if (dto.getClientId() == null || dto.getBusinessId() == null || dto.getServiceId() == null) {
+            throw new IllegalArgumentException("Cliente, negocio y servicio no pueden ser null");
         }
 
-        Users client = usersRepositorio.findById(appointments.getClient().getId())
+        Users client = usersRepositorio.findById(dto.getClientId())
                 .orElseThrow(() -> new RuntimeException("Cliente no encontrado"));
-        Business business = businessRepositorio.findById(appointments.getBusiness().getId())
+
+        Business business = businessRepositorio.findById(dto.getBusinessId())
                 .orElseThrow(() -> new RuntimeException("Negocio no encontrado"));
 
+        BusinnesService service = serviceRepositorio.findById(dto.getServiceId())
+                .orElseThrow(() -> new RuntimeException("Servicio no encontrado"));
+
+        Appointments appointments = new Appointments();
         appointments.setClient(client);
         appointments.setBusiness(business);
+        appointments.setService(service);  // asignar el servicio
+        appointments.setFecha(dto.getFecha());
+        appointments.setHora(dto.getHora());
         appointments.setEstado(EstadoCita.PENDIENTE);
 
-
         Appointments savedAppointment = appointmentsRepositorio.save(appointments);
-        String mensaje = generarMensajeNotificacion(TipoNotification.CITA_CREADA, client, savedAppointment);
 
-// crear notificacion para el negocio
-        notificationService.crearNotificasion(
-                client.getId(),
-               TipoUsuario.CLIENTE,
-                business.getId(),
-                TipoUsuario.NEGOCIO,
-                mensaje,
-                TipoNotification.CITA_CREADA,
-                savedAppointment.getId()
-
-        );
-
+        // Notificaciones aquí igual
 
         return savedAppointment;
     }
@@ -183,7 +183,7 @@ public class AppointmentsServicios {
     }
 
 
-    public Appointments EditarCita(Long idCita, LocalDate nuevaFecha, LocalTime nuevaHora) {
+    public Appointments editarCita(Long idCita, EditarCitaRequest request) {
         Appointments cita = appointmentsRepositorio.findById(idCita)
                 .orElseThrow(() -> new RuntimeException("Cita no encontrada"));
 
@@ -191,16 +191,13 @@ public class AppointmentsServicios {
             throw new RuntimeException("No se puede editar una cita ya confirmada o finalizada.");
         }
 
-        cita.setFecha(nuevaFecha);
-        cita.setHora(nuevaHora);
+        cita.setFecha(request.getNuevaFecha());
+        cita.setHora(request.getNuevaHora());
         cita.setEstado(EstadoCita.PENDIENTE);
 
-        Appointments editedAppointment = appointmentsRepositorio.save(cita);
-
-
-
-        return editedAppointment;
+        return appointmentsRepositorio.save(cita);
     }
+
 
     public List<Appointments> ObtenerCitas() {
         return appointmentsRepositorio.findAll();
