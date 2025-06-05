@@ -26,13 +26,13 @@ public class BusinessController {
     public BusinessController(BusinessService businessService) {
         this.businessService = businessService;
     }
-
+//http://localhost:8081/api/businesses
     @GetMapping
     @Operation(summary = "Obtiene todos los negocios")
     public ResponseEntity<List<BusinessResponseDTO>> getAll() {
         return ResponseEntity.ok(businessService.getAll());
     }
-
+    //http://localhost:8081/api/businesses/1
     @GetMapping("/{id}")
     @Operation(summary = "Obtiene un negocio por ID")
     public ResponseEntity<BusinessResponseDTO> getById(@PathVariable Long id) {
@@ -45,7 +45,7 @@ public class BusinessController {
         BusinessResponseDTO created = businessService.create(dto);
         return ResponseEntity.status(201).body(created);
     }
-
+    //http://localhost:8081/api/businesses/1
     @PutMapping("/{id}")
     @Operation(summary = "Actualiza un negocio existente")
     public ResponseEntity<BusinessResponseDTO> update(@PathVariable Long id, @Valid @RequestBody BusinessRequestDTO dto) {

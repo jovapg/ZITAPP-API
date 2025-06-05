@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDate;
 import java.util.List;
 
 public interface AppointmentsRepositorio  extends JpaRepository<Appointments,Long> {
@@ -22,5 +23,6 @@ public interface AppointmentsRepositorio  extends JpaRepository<Appointments,Lon
 
     // NUEVO: Obtener citas por servicio
     List<Appointments> findByServiceId(Long serviceId);
-
+    // Nuevo método para encontrar citas por ID de negocio y fecha
+    List<Appointments> findByBusinessIdAndFecha(Long businessId, LocalDate fecha);
 }

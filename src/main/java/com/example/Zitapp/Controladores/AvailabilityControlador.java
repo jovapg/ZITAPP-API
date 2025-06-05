@@ -10,13 +10,15 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.format.annotation.DateTimeFormat; // Importar
 
+import java.time.LocalDate; // Importar
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/api/availability")
+@RequestMapping("/api/availability") // Prefijo base para este controlador
 @Tag(name = "Disponibilidad", description = "Operaciones para gestionar la disponibilidad de los negocios")
 public class AvailabilityControlador {
 
@@ -52,7 +54,6 @@ public class AvailabilityControlador {
         }
     }
 
-
     @Operation(summary = "Obtener todas las disponibilidades")
     @ApiResponse(responseCode = "200", description = "Lista de disponibilidades obtenida correctamente")
     @GetMapping
@@ -75,7 +76,6 @@ public class AvailabilityControlador {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Disponibilidad no encontrada");
         }
     }
-
 
     @Operation(summary = "Actualizar una disponibilidad")
     @ApiResponse(responseCode = "200", description = "Disponibilidad actualizada correctamente")
@@ -102,6 +102,30 @@ public class AvailabilityControlador {
             return ResponseEntity.noContent().build();
         } else {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Disponibilidad no encontrada");
+        }
+    }
+
+    @Operation(summary = "Obtener horas disponibles para un negocio en una fecha específica")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Horas disponibles obtenidas correctamente"),
+            @ApiResponse(responseCode = "400", description = "Parámetros de entrada inválidos"),
+            @ApiResponse(responseCode = "500", description = "Error interno del servidor")
+    })
+    @GetMapping("/businesses/{businessId}/available-hours") // Ruta: /api/availability/businesses/{businessId}/available-hours
+    public ResponseEntity<?> getAvailableHours(
+            @PathVariable Long businessId,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+        try {
+            // Llama al nuevo método del servicio para obtener las horas disponibles
+            List<String> availableHours = availabilityServicio.obtenerHorasDisponiblesPorNegocioYFecha(businessId, date);
+            return ResponseEntity.ok(availableHours);
+        } catch (IllegalArgumentException e) {
+            // Maneja el caso de fecha inválida
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        } catch (Exception e) {
+            // Maneja cualquier otro error
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error al obtener horas disponibles: " + e.getMessage());
         }
     }
 }

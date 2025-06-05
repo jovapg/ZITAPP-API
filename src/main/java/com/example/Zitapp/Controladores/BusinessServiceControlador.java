@@ -25,7 +25,7 @@ public class BusinessServiceControlador {
     public BusinessServiceControlador(BusinessServiceServicio serviceServicio) {
         this.serviceServicio = serviceServicio;
     }
-
+//http://localhost:8081/api/services/
     @Operation(summary = "Obtener todos los servicios")
     @GetMapping("/")
     public ResponseEntity<List<BusinnesService>> obtenerTodos() {

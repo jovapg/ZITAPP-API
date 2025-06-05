@@ -1,6 +1,7 @@
 package com.example.Zitapp.Modelos;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonBackReference; // Importar
 import jakarta.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -20,6 +21,7 @@ public class Business {
     private String categoria;
     private String descripcion;
     private String direccion;
+    private String telefono; // <--- Asegúrate de tener el campo teléfono si lo usas en el frontend
 
     @Column(name = "imagen_url")
     private String imagenUrl;
@@ -28,15 +30,15 @@ public class Business {
     private Long idUsuario;
 
     @OneToMany(mappedBy = "business", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference("business-services")
+    @JsonManagedReference("business-services") // Esta relación está bien si quieres ver los servicios al serializar Business
     private List<BusinnesService> services = new ArrayList<>();
 
     @OneToMany(mappedBy = "business", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference("business-availabilities")
+    @JsonManagedReference("business-availabilities") // Esta relación está bien si quieres ver las disponibilidades al serializar Business
     private List<Availability> availabilities = new ArrayList<>();
 
     @OneToMany(mappedBy = "business", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference("business-appointments")
+    @JsonBackReference("appointment-to-business") // <--- CAMBIO CLAVE AQUÍ: Esta lista NO se serializa al serializar Business
     private List<Appointments> appointments = new ArrayList<>();
 
     // Constructor vacío requerido por JPA
@@ -44,13 +46,14 @@ public class Business {
 
     // Constructor para crear una instancia con datos
     public Business(String nombre, String categoria, String descripcion, String direccion,
-                    String imagenUrl, Long idUsuario) {
+                    String imagenUrl, Long idUsuario, String telefono) { // Añadido telefono al constructor
         this.nombre = nombre;
         this.categoria = categoria;
         this.descripcion = descripcion;
         this.direccion = direccion;
         this.imagenUrl = imagenUrl;
         this.idUsuario = idUsuario;
+        this.telefono = telefono; // Asignar teléfono
     }
 
     // Getters y setters
@@ -132,6 +135,14 @@ public class Business {
 
     public void setAppointments(List<Appointments> appointments) {
         this.appointments = appointments;
+    }
+
+    public String getTelefono() { // <--- Getter para teléfono
+        return telefono;
+    }
+
+    public void setTelefono(String telefono) { // <--- Setter para teléfono
+        this.telefono = telefono;
     }
 
     // Métodos auxiliares para manejo bidireccional
