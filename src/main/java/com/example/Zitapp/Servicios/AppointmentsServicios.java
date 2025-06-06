@@ -1,22 +1,32 @@
-// src/main/java/com/example/Zitapp/Servicios/AppointmentsServicios.java
 package com.example.Zitapp.Servicios;
 
-import com.example.Zitapp.DTO.AppointmentCreateDTO;
-import com.example.Zitapp.Modelos.*;
-import com.example.Zitapp.Modelos.Users.TipoUsuario; // Importa el TipoUsuario de Users
-import com.example.Zitapp.Modelos.Notification.TipoNotification; // Importa el TipoNotification de Notification
-// No necesitamos importar directamente Notification.TipoUsuario aquí si lo convertimos inline
+// --- Importaciones de Entidades (Modelos) ---
+import com.example.Zitapp.Modelos.Appointments;
+import com.example.Zitapp.Modelos.Users;
+import com.example.Zitapp.Modelos.Business;
+import com.example.Zitapp.Modelos.BusinnesService;
+import com.example.Zitapp.Modelos.EstadoCita; // Importado para el enum
+
+// --- Importaciones de Repositorios ---
 import com.example.Zitapp.Repositorios.AppointmentsRepositorio;
+import com.example.Zitapp.Repositorios.UsersRepositorio;
 import com.example.Zitapp.Repositorios.BusinessRepositorio;
 import com.example.Zitapp.Repositorios.BusinessServiceRepositorio;
-import com.example.Zitapp.Repositorios.UsersRepositorio;
+
+
+// --- Importaciones de DTOs ---
+import com.example.Zitapp.DTO.AppointmentCreateDTO;
+import com.example.Zitapp.DTO.AppointmentDetailsDTO;
+
+
+// --- Otros imports de Spring y Java ---
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import java.time.LocalDate;
-import java.time.LocalTime;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Optional;
-import org.springframework.transaction.annotation.Transactional;
+import java.util.stream.Collectors;
+
 
 @Service
 public class AppointmentsServicios {
@@ -25,223 +35,125 @@ public class AppointmentsServicios {
     private AppointmentsRepositorio appointmentsRepositorio;
 
     @Autowired
-    private UsersRepositorio usersRepositorio;
+    private UsersRepositorio usersRepository;
 
     @Autowired
-    private BusinessRepositorio businessRepositorio;
+    private BusinessRepositorio businessRepository;
 
     @Autowired
-    private NotificationService notificationService; // Asegúrate de que NotificationService esté implementado y sea un @Service
+    private BusinessServiceRepositorio businessServiceRepository;
 
-    @Autowired
-    private BusinessServiceRepositorio serviceRepositorio;  // inyecta tu repositorio de servicios
 
-    // Este método generarMensajeNotificacion está bien, usa TipoNotification de Notification
-    private String generarMensajeNotificacion(TipoNotification tipo, Users client, Appointments cita) {
-        switch (tipo) {
-            case CITA_CREADA:
-                return String.format("Nueva cita creada con %s para el día %s a las %s.",
-                        client.getNombre(),
-                        cita.getFecha().toString(),
-                        cita.getHora().toString());
-            case CITA_CANCELADA:
-                return String.format("La cita con %s para el día %s a las %s fue cancelada.",
-                        client.getNombre(),
-                        cita.getFecha().toString(),
-                        cita.getHora().toString());
-            case CITA_CONFIRMADA:
-                return String.format("La cita con %s para el día %s a las %s fue confirmada.",
-                        client.getNombre(),
-                        cita.getFecha().toString(),
-                        cita.getHora().toString());
-            case CITA_FINALIZADA:
-                return String.format("La cita con %s para el día %s a las %s fue finalizada.",
-                        client.getNombre(),
-                        cita.getFecha().toString(),
-                        cita.getHora().toString());
-            default:
-                return "Tienes una nueva notificación.";
-        }
-    }
+    // --- Métodos de Creación, Obtención, Actualización, Eliminación ---
 
+    // Método para crear una cita (requiere AppointmentCreateDTO)
     @Transactional
-    public Appointments CrearCita(AppointmentCreateDTO dto) {
-        if (dto.getClientId() == null || dto.getBusinessId() == null || dto.getServiceId() == null) {
-            throw new IllegalArgumentException("Cliente, negocio y servicio no pueden ser null");
-        }
+    public Appointments createAppointment(AppointmentCreateDTO dto) {
+        Users client = usersRepository.findById(dto.getClientId())
+                .orElseThrow(() -> new IllegalArgumentException("Cliente no encontrado con ID: " + dto.getClientId()));
+        Business business = businessRepository.findById(dto.getBusinessId())
+                .orElseThrow(() -> new IllegalArgumentException("Negocio no encontrado con ID: " + dto.getBusinessId()));
+        BusinnesService service = businessServiceRepository.findById(dto.getServiceId())
+                .orElseThrow(() -> new IllegalArgumentException("Servicio no encontrado con ID: " + dto.getServiceId()));
 
-        Users client = usersRepositorio.findById(dto.getClientId())
-                .orElseThrow(() -> new RuntimeException("Cliente no encontrado"));
+        Appointments appointment = new Appointments();
+        appointment.setClient(client);
+        appointment.setBusiness(business);
+        appointment.setService(service);
+        appointment.setFecha(dto.getFecha());
+        appointment.setHora(dto.getHora());
+        appointment.setEstado(EstadoCita.PENDIENTE);
 
-        Business business = businessRepositorio.findById(dto.getBusinessId())
-                .orElseThrow(() -> new RuntimeException("Negocio no encontrado"));
-
-        BusinnesService service = serviceRepositorio.findById(dto.getServiceId())
-                .orElseThrow(() -> new RuntimeException("Servicio no encontrado"));
-
-        Appointments appointments = new Appointments();
-        appointments.setClient(client);
-        appointments.setBusiness(business);
-        appointments.setService(service);
-        appointments.setFecha(dto.getFecha());
-        appointments.setHora(dto.getHora());
-        appointments.setEstado(EstadoCita.PENDIENTE);
-
-        Appointments savedAppointment = appointmentsRepositorio.save(appointments);
-
-        return savedAppointment;
+        return appointmentsRepositorio.save(appointment);
     }
 
-    @Transactional
-    public Appointments ConfirmarCita(long idCita) {
-        Appointments cita = appointmentsRepositorio.findById(idCita)
-                .orElseThrow(() -> new RuntimeException("Cita no encontrada"));
-
-        cita.setEstado(EstadoCita.CONFIRMADA);
-        Appointments confirmedAppointment = appointmentsRepositorio.save(cita);
-
-        Users client = cita.getClient();
-        Business business = cita.getBusiness();
-
-        String mensajeCliente = generarMensajeNotificacion(TipoNotification.CITA_CONFIRMADA, client, confirmedAppointment);
-
-        notificationService.crearNotificasion(
-                business.getId(),
-                // ¡CORRECCIÓN CLAVE AQUÍ!
-                // Conversión del Users.TipoUsuario a Notification.TipoUsuario
-                com.example.Zitapp.Modelos.Notification.TipoUsuario.valueOf(business.getUsuario().getTipo().name()),
-                client.getId(),
-                // ¡CORRECCIÓN CLAVE AQUÍ!
-                // Conversión del Users.TipoUsuario a Notification.TipoUsuario
-                com.example.Zitapp.Modelos.Notification.TipoUsuario.valueOf(client.getTipo().name()),
-                mensajeCliente,
-                TipoNotification.CITA_CONFIRMADA,
-                confirmedAppointment.getId()
-        );
-
-        return confirmedAppointment;
-    }
-
-    @Transactional
-    public Appointments CancelarCita(long idCita) {
-        Appointments cita = appointmentsRepositorio.findById(idCita)
-                .orElseThrow(() -> new RuntimeException("Cita no encontrada"));
-
-        if (cita.getEstado() == EstadoCita.CONFIRMADA || cita.getEstado() == EstadoCita.FINALIZADA) {
-            throw new RuntimeException("No se puede cancelar una cita ya confirmada o finalizada.");
-        }
-
-        cita.setEstado(EstadoCita.CANCELADA);
-        Appointments cancelledAppointment = appointmentsRepositorio.save(cita);
-        Users client = cita.getClient();
-        Business business = cita.getBusiness();
-
-        String mensajeCliente = generarMensajeNotificacion(TipoNotification.CITA_CANCELADA, client, cancelledAppointment);
-        String mensajeNegocio = generarMensajeNotificacion(TipoNotification.CITA_CANCELADA, client, cancelledAppointment);
-
-        notificationService.crearNotificasion(
-                business.getId(),
-                // ¡CORRECCIÓN CLAVE AQUÍ!
-                com.example.Zitapp.Modelos.Notification.TipoUsuario.valueOf(business.getUsuario().getTipo().name()),
-                client.getId(),
-                // ¡CORRECCIÓN CLAVE AQUÍ!
-                com.example.Zitapp.Modelos.Notification.TipoUsuario.valueOf(client.getTipo().name()),
-                mensajeCliente,
-                TipoNotification.CITA_CANCELADA,
-                cancelledAppointment.getId()
-        );
-
-        notificationService.crearNotificasion(
-                client.getId(),
-                // ¡CORRECCIÓN CLAVE AQUÍ!
-                com.example.Zitapp.Modelos.Notification.TipoUsuario.valueOf(client.getTipo().name()),
-                business.getId(),
-                // ¡CORRECCIÓN CLAVE AQUÍ!
-                com.example.Zitapp.Modelos.Notification.TipoUsuario.valueOf(business.getUsuario().getTipo().name()),
-                mensajeNegocio,
-                TipoNotification.CITA_CANCELADA,
-                cancelledAppointment.getId()
-        );
-
-        return cancelledAppointment;
-    }
-
-    @Transactional
-    public Appointments FinalizarCita(long idCita) {
-        Appointments cita = appointmentsRepositorio.findById(idCita)
-                .orElseThrow(() -> new RuntimeException("Cita no encontrada"));
-
-        cita.setEstado(EstadoCita.FINALIZADA);
-        Appointments finalizedAppointment = appointmentsRepositorio.save(cita);
-
-        Users client = cita.getClient();
-        Business business = cita.getBusiness();
-
-        String mensajeCliente = generarMensajeNotificacion(TipoNotification.CITA_FINALIZADA, client, finalizedAppointment);
-
-        notificationService.crearNotificasion(
-                business.getId(),
-                // ¡CORRECCIÓN CLAVE AQUÍ!
-                com.example.Zitapp.Modelos.Notification.TipoUsuario.valueOf(business.getUsuario().getTipo().name()),
-                client.getId(),
-                // ¡CORRECCIÓN CLAVE AQUÍ!
-                com.example.Zitapp.Modelos.Notification.TipoUsuario.valueOf(client.getTipo().name()),
-                mensajeCliente,
-                TipoNotification.CITA_FINALIZADA,
-                finalizedAppointment.getId()
-        );
-
-        return finalizedAppointment;
-    }
-
-    @Transactional
-    public Appointments editarCita(Long idCita, EditarCitaRequest request) {
-        Appointments cita = appointmentsRepositorio.findById(idCita)
-                .orElseThrow(() -> new RuntimeException("Cita no encontrada"));
-
-        if (cita.getEstado() == EstadoCita.CONFIRMADA || cita.getEstado() == EstadoCita.FINALIZADA) {
-            throw new RuntimeException("No se puede editar una cita ya confirmada o finalizada.");
-        }
-
-        cita.setFecha(request.getNuevaFecha());
-        cita.setHora(request.getNuevaHora());
-        cita.setEstado(EstadoCita.PENDIENTE);
-
-        return appointmentsRepositorio.save(cita);
-    }
-
+    /**
+     * Obtiene una cita por su ID y la mapea a un DTO de detalles para evitar sobre-serialización.
+     * @param id ID de la cita
+     * @return Optional con el AppointmentDetailsDTO si se encuentra la cita
+     */
     @Transactional(readOnly = true)
-    public List<Appointments> ObtenerCitas() {
+    public Optional<AppointmentDetailsDTO> ObtenerCita(Long id) {
+        Optional<Appointments> appointmentOptional = appointmentsRepositorio.findById(id);
+
+        if (appointmentOptional.isPresent()) {
+            Appointments appointment = appointmentOptional.get();
+
+            AppointmentDetailsDTO dto = new AppointmentDetailsDTO();
+            dto.setId(appointment.getId());
+            dto.setFecha(appointment.getFecha());
+            dto.setHora(appointment.getHora());
+            dto.setEstado(appointment.getEstado().name());
+
+            if (appointment.getClient() != null) {
+                Users client = appointment.getClient();
+                dto.setClient(new AppointmentDetailsDTO.ClientInfoDTO(client.getId(), client.getNombre(), client.getEmail(), client.getTelefono()));
+            }
+
+            if (appointment.getBusiness() != null) {
+                Business business = appointment.getBusiness();
+                dto.setBusiness(new AppointmentDetailsDTO.BusinessInfoDTO(business.getId(), business.getNombre(), business.getCategoria(), business.getDireccion(), business.getTelefono()));
+            }
+
+            if (appointment.getService() != null) {
+                BusinnesService service = appointment.getService();
+                dto.setService(new AppointmentDetailsDTO.ServiceInfoDTO(service.getId(), service.getNombre(), service.getDescripcion(), service.getPrecio(), service.getDuracion()));
+            }
+
+            return Optional.of(dto);
+        } else {
+            return Optional.empty();
+        }
+    }
+
+    // Método para obtener todas las citas
+    @Transactional(readOnly = true)
+    public List<Appointments> obtenerTodos() {
         return appointmentsRepositorio.findAll();
     }
 
+    // Método para obtener citas por negocio (asume que el repositorio tiene findByBusinessId)
+    // Usamos findByBusinessIdWithClientAndService para cargar las relaciones necesarias para el DTO
     @Transactional(readOnly = true)
-    public Optional<Appointments> ObtenerCita(Long idCita) {
-        return appointmentsRepositorio.findById(idCita);
+    public List<Appointments> obtenerCitasPorNegocio(Long idBusiness) {
+        // ¡CORRECCIÓN AQUÍ! Usamos el método que carga las relaciones
+        return appointmentsRepositorio.findByBusinessIdWithClientAndService(idBusiness);
     }
 
+    // Método para obtener citas por cliente (asume que el repositorio tiene findByClientIdWithService)
     @Transactional(readOnly = true)
-    public List<Appointments> ObtenerCitasPorCliente(Long idCliente) {
-        return appointmentsRepositorio.findByClientIdWithService(idCliente);
+    public List<Appointments> obtenerCitasPorCliente(Long idClient) {
+        // ¡CORRECCIÓN AQUÍ! Usamos el método que carga las relaciones
+        return appointmentsRepositorio.findByClientIdWithService(idClient);
     }
 
-    @Transactional(readOnly = true)
-    public List<Appointments> ObtenerCitasPorNegocio(Long idNegocio) {
-        return appointmentsRepositorio.findByBusinessIdWithClientAndService(idNegocio);
-    }
-
-    @Transactional(readOnly = true)
-    public List<Appointments> ObtenerCitasPendientesPorNegocio(Long idNegocio) {
-        return appointmentsRepositorio.findByBusinessIdAndEstado(idNegocio, EstadoCita.PENDIENTE);
-    }
-
+    // Método para actualizar el estado de una cita
     @Transactional
-    public void EliminarCita(Long id) throws Exception {
-        Optional<Appointments> cita = appointmentsRepositorio.findById(id);
-        if (cita.isPresent()) {
-            appointmentsRepositorio.deleteById(id);
-        } else {
-            throw new Exception("La cita con ID " + id + " no existe.");
+    public AppointmentDetailsDTO updateAppointmentStatus(Long id, String newStatus) {
+        Appointments appointment = appointmentsRepositorio.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Cita no encontrada con ID: " + id));
+
+        try {
+            appointment.setEstado(EstadoCita.valueOf(newStatus.toUpperCase()));
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("Estado de cita inválido: " + newStatus);
         }
+
+        Appointments updatedAppointment = appointmentsRepositorio.save(appointment);
+        return ObtenerCita(updatedAppointment.getId()).orElseThrow(() -> new RuntimeException("Error al mapear cita actualizada a DTO"));
+    }
+
+    // Método para eliminar una cita
+    @Transactional
+    public void deleteAppointment(Long id) {
+        if (!appointmentsRepositorio.existsById(id)) {
+            throw new IllegalArgumentException("Cita no encontrada con ID: " + id);
+        }
+        appointmentsRepositorio.deleteById(id);
+    }
+
+    // Método para verificar si existe una cita por ID
+    public boolean existePorId(Long id) {
+        return appointmentsRepositorio.existsById(id);
     }
 }
