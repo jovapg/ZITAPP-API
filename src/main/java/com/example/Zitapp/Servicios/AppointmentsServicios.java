@@ -1,18 +1,22 @@
+// src/main/java/com/example/Zitapp/Servicios/AppointmentsServicios.java
 package com.example.Zitapp.Servicios;
 
 import com.example.Zitapp.DTO.AppointmentCreateDTO;
 import com.example.Zitapp.Modelos.*;
+import com.example.Zitapp.Modelos.Users.TipoUsuario; // Importa el TipoUsuario de Users
+import com.example.Zitapp.Modelos.Notification.TipoNotification; // Importa el TipoNotification de Notification
+// No necesitamos importar directamente Notification.TipoUsuario aquí si lo convertimos inline
 import com.example.Zitapp.Repositorios.AppointmentsRepositorio;
 import com.example.Zitapp.Repositorios.BusinessRepositorio;
 import com.example.Zitapp.Repositorios.BusinessServiceRepositorio;
 import com.example.Zitapp.Repositorios.UsersRepositorio;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import com.example.Zitapp.Modelos.Notification.*;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class AppointmentsServicios {
@@ -27,11 +31,12 @@ public class AppointmentsServicios {
     private BusinessRepositorio businessRepositorio;
 
     @Autowired
-    private NotificationService notificationService;
+    private NotificationService notificationService; // Asegúrate de que NotificationService esté implementado y sea un @Service
 
     @Autowired
     private BusinessServiceRepositorio serviceRepositorio;  // inyecta tu repositorio de servicios
 
+    // Este método generarMensajeNotificacion está bien, usa TipoNotification de Notification
     private String generarMensajeNotificacion(TipoNotification tipo, Users client, Appointments cita) {
         switch (tipo) {
             case CITA_CREADA:
@@ -59,7 +64,7 @@ public class AppointmentsServicios {
         }
     }
 
-
+    @Transactional
     public Appointments CrearCita(AppointmentCreateDTO dto) {
         if (dto.getClientId() == null || dto.getBusinessId() == null || dto.getServiceId() == null) {
             throw new IllegalArgumentException("Cliente, negocio y servicio no pueden ser null");
@@ -77,18 +82,17 @@ public class AppointmentsServicios {
         Appointments appointments = new Appointments();
         appointments.setClient(client);
         appointments.setBusiness(business);
-        appointments.setService(service);  // asignar el servicio
+        appointments.setService(service);
         appointments.setFecha(dto.getFecha());
         appointments.setHora(dto.getHora());
         appointments.setEstado(EstadoCita.PENDIENTE);
 
         Appointments savedAppointment = appointmentsRepositorio.save(appointments);
 
-        // Notificaciones aquí igual
-
         return savedAppointment;
     }
 
+    @Transactional
     public Appointments ConfirmarCita(long idCita) {
         Appointments cita = appointmentsRepositorio.findById(idCita)
                 .orElseThrow(() -> new RuntimeException("Cita no encontrada"));
@@ -101,12 +105,15 @@ public class AppointmentsServicios {
 
         String mensajeCliente = generarMensajeNotificacion(TipoNotification.CITA_CONFIRMADA, client, confirmedAppointment);
 
-        // Notificación solo para el cliente
         notificationService.crearNotificasion(
-                business.getId(),               // quien envía la notificación (negocio)
-                TipoUsuario.NEGOCIO,
-                client.getId(),                 // quien recibe la notificación (cliente)
-                TipoUsuario.CLIENTE,
+                business.getId(),
+                // ¡CORRECCIÓN CLAVE AQUÍ!
+                // Conversión del Users.TipoUsuario a Notification.TipoUsuario
+                com.example.Zitapp.Modelos.Notification.TipoUsuario.valueOf(business.getUsuario().getTipo().name()),
+                client.getId(),
+                // ¡CORRECCIÓN CLAVE AQUÍ!
+                // Conversión del Users.TipoUsuario a Notification.TipoUsuario
+                com.example.Zitapp.Modelos.Notification.TipoUsuario.valueOf(client.getTipo().name()),
                 mensajeCliente,
                 TipoNotification.CITA_CONFIRMADA,
                 confirmedAppointment.getId()
@@ -115,6 +122,7 @@ public class AppointmentsServicios {
         return confirmedAppointment;
     }
 
+    @Transactional
     public Appointments CancelarCita(long idCita) {
         Appointments cita = appointmentsRepositorio.findById(idCita)
                 .orElseThrow(() -> new RuntimeException("Cita no encontrada"));
@@ -131,23 +139,25 @@ public class AppointmentsServicios {
         String mensajeCliente = generarMensajeNotificacion(TipoNotification.CITA_CANCELADA, client, cancelledAppointment);
         String mensajeNegocio = generarMensajeNotificacion(TipoNotification.CITA_CANCELADA, client, cancelledAppointment);
 
-        // Notificación para el cliente
         notificationService.crearNotificasion(
                 business.getId(),
-                TipoUsuario.NEGOCIO,
+                // ¡CORRECCIÓN CLAVE AQUÍ!
+                com.example.Zitapp.Modelos.Notification.TipoUsuario.valueOf(business.getUsuario().getTipo().name()),
                 client.getId(),
-                TipoUsuario.CLIENTE,
+                // ¡CORRECCIÓN CLAVE AQUÍ!
+                com.example.Zitapp.Modelos.Notification.TipoUsuario.valueOf(client.getTipo().name()),
                 mensajeCliente,
                 TipoNotification.CITA_CANCELADA,
                 cancelledAppointment.getId()
         );
 
-        // Notificación para el negocio
         notificationService.crearNotificasion(
                 client.getId(),
-                TipoUsuario.CLIENTE,
+                // ¡CORRECCIÓN CLAVE AQUÍ!
+                com.example.Zitapp.Modelos.Notification.TipoUsuario.valueOf(client.getTipo().name()),
                 business.getId(),
-                TipoUsuario.NEGOCIO,
+                // ¡CORRECCIÓN CLAVE AQUÍ!
+                com.example.Zitapp.Modelos.Notification.TipoUsuario.valueOf(business.getUsuario().getTipo().name()),
                 mensajeNegocio,
                 TipoNotification.CITA_CANCELADA,
                 cancelledAppointment.getId()
@@ -156,6 +166,7 @@ public class AppointmentsServicios {
         return cancelledAppointment;
     }
 
+    @Transactional
     public Appointments FinalizarCita(long idCita) {
         Appointments cita = appointmentsRepositorio.findById(idCita)
                 .orElseThrow(() -> new RuntimeException("Cita no encontrada"));
@@ -168,12 +179,13 @@ public class AppointmentsServicios {
 
         String mensajeCliente = generarMensajeNotificacion(TipoNotification.CITA_FINALIZADA, client, finalizedAppointment);
 
-        // Notificar solo al cliente que la cita fue finalizada
         notificationService.crearNotificasion(
-                business.getId(),               // emisor (negocio)
-                TipoUsuario.NEGOCIO,
-                client.getId(),                 // receptor (cliente)
-                TipoUsuario.CLIENTE,
+                business.getId(),
+                // ¡CORRECCIÓN CLAVE AQUÍ!
+                com.example.Zitapp.Modelos.Notification.TipoUsuario.valueOf(business.getUsuario().getTipo().name()),
+                client.getId(),
+                // ¡CORRECCIÓN CLAVE AQUÍ!
+                com.example.Zitapp.Modelos.Notification.TipoUsuario.valueOf(client.getTipo().name()),
                 mensajeCliente,
                 TipoNotification.CITA_FINALIZADA,
                 finalizedAppointment.getId()
@@ -182,7 +194,7 @@ public class AppointmentsServicios {
         return finalizedAppointment;
     }
 
-
+    @Transactional
     public Appointments editarCita(Long idCita, EditarCitaRequest request) {
         Appointments cita = appointmentsRepositorio.findById(idCita)
                 .orElseThrow(() -> new RuntimeException("Cita no encontrada"));
@@ -198,27 +210,32 @@ public class AppointmentsServicios {
         return appointmentsRepositorio.save(cita);
     }
 
-
+    @Transactional(readOnly = true)
     public List<Appointments> ObtenerCitas() {
         return appointmentsRepositorio.findAll();
     }
 
+    @Transactional(readOnly = true)
     public Optional<Appointments> ObtenerCita(Long idCita) {
         return appointmentsRepositorio.findById(idCita);
     }
 
+    @Transactional(readOnly = true)
     public List<Appointments> ObtenerCitasPorCliente(Long idCliente) {
         return appointmentsRepositorio.findByClientIdWithService(idCliente);
     }
 
+    @Transactional(readOnly = true)
     public List<Appointments> ObtenerCitasPorNegocio(Long idNegocio) {
-        return appointmentsRepositorio.findByBusinessId(idNegocio);
+        return appointmentsRepositorio.findByBusinessIdWithClientAndService(idNegocio);
     }
 
+    @Transactional(readOnly = true)
     public List<Appointments> ObtenerCitasPendientesPorNegocio(Long idNegocio) {
         return appointmentsRepositorio.findByBusinessIdAndEstado(idNegocio, EstadoCita.PENDIENTE);
     }
 
+    @Transactional
     public void EliminarCita(Long id) throws Exception {
         Optional<Appointments> cita = appointmentsRepositorio.findById(id);
         if (cita.isPresent()) {

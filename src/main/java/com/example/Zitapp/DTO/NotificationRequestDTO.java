@@ -1,6 +1,10 @@
+// src/main/java/com/example/Zitapp/DTO/NotificationRequestDTO.java
 package com.example.Zitapp.DTO;
- import  com.example.Zitapp.Modelos.Notification.TipoUsuario;
- import  com.example.Zitapp.Modelos.Notification.TipoNotification;
+
+// Importar los enums directamente desde la clase Notification
+import com.example.Zitapp.Modelos.Notification.TipoUsuario;
+import com.example.Zitapp.Modelos.Notification.TipoNotification;
+
 public class NotificationRequestDTO {
     private Long senderId;
     private TipoUsuario senderType;
@@ -11,7 +15,7 @@ public class NotificationRequestDTO {
     private Long appointmentId;
 
     // Getters y Setters
-
+    // ... (el resto de tus getters y setters existentes)
     public Long getSenderId() {
         return senderId;
     }
@@ -68,4 +72,3 @@ public class NotificationRequestDTO {
         this.senderType = senderType;
     }
 }
-

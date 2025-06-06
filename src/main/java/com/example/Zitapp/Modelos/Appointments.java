@@ -1,8 +1,9 @@
+// src/main/java/com/example/Zitapp/Modelos/Appointments.java
 package com.example.Zitapp.Modelos;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonManagedReference; // Importar
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+// import com.fasterxml.jackson.annotation.JsonBackReference; // Ya no la necesitamos aquí para client
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties; // Importar
 import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -10,7 +11,7 @@ import java.time.LocalTime;
 import java.util.Optional;
 
 @Entity
-@Table(name = "Appointments")
+@Table(name = "Appointments") // Asegúrate del nombre de la tabla
 public class Appointments {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -18,20 +19,24 @@ public class Appointments {
 
     @ManyToOne(fetch = FetchType.EAGER, optional = false)
     @JoinColumn(name = "id_cliente", nullable = false)
-    @JsonBackReference("user-appointments") // Mantener si la relación bidireccional User->Appointments existe
+    // --- CAMBIO CLAVE AQUÍ: Quitar JsonBackReference para 'client' ---
+    // Si Users tiene una lista de citas, y Appointments tiene un Users 'client',
+    // Y quieres serializar el cliente completo dentro de la cita, necesitas
+    // usar JsonIgnoreProperties para evitar un bucle si Users también tiene una lista de citas.
+    @JsonIgnoreProperties({"appointments", "business"}) // Ignora las citas y el negocio de la entidad Users para evitar recursión
     private Users client;
 
 
     @ManyToOne(fetch = FetchType.EAGER, optional = false)
     @JoinColumn(name = "id_negocio", nullable = false)
-    @JsonManagedReference("appointment-to-business") // <--- CAMBIO CLAVE AQUÍ: Ahora se serializa Business desde Appointments
+    @JsonManagedReference("appointment-to-business") // Esto está bien si el Business tiene una @JsonBackReference a Appointments
     private Business business;
 
 
-    @ManyToOne(fetch = FetchType.EAGER) // Ya estaba en EAGER, lo cual es bueno para cargar el servicio
+    @ManyToOne(fetch = FetchType.EAGER) // Ya estaba en EAGER
     @JoinColumn(name = "id_servicio", nullable = false)
-    // Mantener esta anotación para evitar la recursión si Service también tiene una referencia a Appointments
-    @JsonIgnoreProperties({"business", "appointments"}) // Asumo que estas propiedades están en Service
+    // Mantener esta anotación para evitar la recursión si BusinnesService tiene una referencia a Business o Appointments
+    @JsonIgnoreProperties({"business", "appointments"}) // Asumo que estas propiedades están en BusinnesService
     private BusinnesService service;
 
 
@@ -47,14 +52,14 @@ public class Appointments {
 
     // Constructor para crear una instancia con datos
     // Nota: Es mejor usar un Builder pattern o setters para asignar todas las propiedades
-    public Appointments(Long id, EstadoCita estado, LocalTime hora, LocalDate fecha, Business business, Users client) {
+    public Appointments(Long id, EstadoCita estado, LocalTime hora, LocalDate fecha, Business business, Users client, BusinnesService service) {
         this.id = id;
         this.estado = estado;
         this.hora = hora;
         this.fecha = fecha;
         this.business = business;
         this.client = client;
-        // service no está en este constructor, asegúrate de setearlo si es necesario
+        this.service = service; // Asegúrate de incluir el servicio aquí si usas este constructor
     }
 
     // Helper para obtener LocalDateTime (si lo usas)

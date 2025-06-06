@@ -1,3 +1,4 @@
+// src/main/java/com/example/Zitapp/Controladores/UsersControlador.java
 package com.example.Zitapp.Controladores;
 
 import com.example.Zitapp.DTO.LoginDTO;
@@ -5,11 +6,12 @@ import com.example.Zitapp.DTO.UsersDTO;
 import com.example.Zitapp.Modelos.Appointments;
 import com.example.Zitapp.Modelos.Users;
 import com.example.Zitapp.Servicios.UsersServicios;
+import com.example.Zitapp.Servicios.BusinessService; // ¡Importar BusinessService!
+import com.example.Zitapp.DTO.BusinessResponseDTO; // Importar BusinessResponseDTO
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
-
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 
@@ -34,6 +36,9 @@ public class UsersControlador {
     @Autowired
     private UsersServicios usersServicios;
 
+    @Autowired // ¡Inyectar BusinessService!
+    private BusinessService businessService;
+
     /**
      * Convierte un DTO de usuario a la entidad Users.
      * @param dto DTO con datos de usuario
@@ -51,12 +56,14 @@ public class UsersControlador {
             try {
                 user.setTipo(Users.TipoUsuario.valueOf(dto.getTipo().toUpperCase()));
             } catch (IllegalArgumentException e) {
-                user.setTipo(null); // Manejo simple, se puede mejorar
+                user.setTipo(null);
             }
         }
 
         if (dto.getEdad() != null) {
             user.setEdad(dto.getEdad().shortValue());
+        } else {
+            user.setEdad((short) 0); // O manejar como prefieras si la edad puede ser null en el DTO
         }
 
         user.setImagenPerfil(dto.getImagenPerfil());
@@ -66,6 +73,7 @@ public class UsersControlador {
 
     /**
      * Convierte la entidad Users a su DTO correspondiente.
+     * MODIFICADO: Ahora incluye businessId si el usuario es de tipo NEGOCIO.
      * @param user entidad Users
      * @return DTO con datos de usuario
      */
@@ -79,12 +87,31 @@ public class UsersControlador {
         dto.setTipo(user.getTipo() != null ? user.getTipo().name() : null);
         dto.setEdad((int) user.getEdad());
         dto.setImagenPerfil(user.getImagenPerfil());
+
+        // --- Lógica para añadir el businessId si el usuario es un negocio ---
+        if (user.getTipo() == Users.TipoUsuario.NEGOCIO) {
+            try {
+                // Usamos el BusinessService para buscar el negocio por el ID de usuario
+                // El BusinessService debería tener un método para esto, por ejemplo, getBusinessByUserId.
+                // Si no existe, lo crearemos en BusinessService.
+                BusinessResponseDTO businessDTO = businessService.getByUserId(user.getId());
+                if (businessDTO != null) {
+                    dto.setBusinessId(businessDTO.getId());
+                } else {
+                    System.out.println("Advertencia: Usuario NEGOCIO con ID " + user.getId() + " no tiene un negocio asociado registrado en BusinessService.");
+                }
+            } catch (Exception e) {
+                System.err.println("Error al buscar negocio asociado para usuario " + user.getId() + ": " + e.getMessage());
+                // Podrías decidir si quieres lanzar una excepción o simplemente dejar businessId como null
+            }
+        }
+        // ------------------------------------------------------------------
+
         return dto;
     }
 
     /**
      * Crea un nuevo usuario validando los datos y evitando duplicados.
-     *
      * @param nuevoUsuarioDTO DTO con datos del nuevo usuario
      * @return usuario creado con código HTTP 201, o error 409 si ya existe
      */
@@ -107,7 +134,6 @@ public class UsersControlador {
 
     /**
      * Obtiene todos los usuarios registrados.
-     *
      * @return lista de usuarios
      */
     @Operation(summary = "Obtener todos los usuarios")
@@ -115,14 +141,13 @@ public class UsersControlador {
     public ResponseEntity<List<UsersDTO>> obtenerTodos() {
         List<Users> usuarios = usersServicios.obtenerTodos();
         List<UsersDTO> dtos = usuarios.stream()
-                .map(this::convertirADTO)
+                .map(this::convertirADTO) // Esto va a hacer una llamada a BusinessService por cada usuario, ¡cuidado con el rendimiento!
                 .collect(Collectors.toList());
         return ResponseEntity.ok(dtos);
     }
 
     /**
      * Obtiene un usuario por su ID.
-     *
      * @param id ID del usuario
      * @return usuario encontrado o error 404 si no existe
      */
@@ -140,12 +165,10 @@ public class UsersControlador {
 
     /**
      * Actualiza un usuario existente con los nuevos datos.
-     *
      * @param id ID del usuario a actualizar
      * @param dtoActualizado DTO con los datos nuevos
      * @return usuario actualizado o error 404 si no existe
      */
-
     @Operation(summary = "Actualizar usuario por ID")
     @ApiResponse(responseCode = "404", description = "Usuario no encontrado para actualizar")
     @PutMapping("/{id}")
@@ -156,13 +179,11 @@ public class UsersControlador {
             return ResponseEntity.ok(convertirADTO(usuarioOpt.get()));
         } else {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Usuario no encontrado para actualizar");
-
         }
     }
 
     /**
      * Elimina un usuario por su ID.
-     *
      * @param id ID del usuario
      * @return mensaje de éxito o error 404 si no se encontró
      */
@@ -180,9 +201,9 @@ public class UsersControlador {
 
     /**
      * Autentica un usuario con email y contraseña.
-     *
+     * MODIFICADO: La respuesta del DTO ahora incluye el businessId.
      * @param loginDto DTO con email y contraseña
-     * @return usuario autenticado o error 401 si falla
+     * @return usuario autenticado con businessId (si aplica) o error 401 si falla
      */
     @Operation(summary = "Autenticar usuario (login)")
     @ApiResponses(value = {
@@ -192,19 +213,18 @@ public class UsersControlador {
     })
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody @Valid LoginDTO loginDto) {
-        // Validar campos requeridos con anotaciones @Valid y @NotBlank en LoginDTO
         Users user = usersServicios.autenticarUsuario(loginDto.getEmail(), loginDto.getContrasena());
         if (user != null) {
-            return ResponseEntity.ok(convertirADTO(user));
+            // Se usa convertirADTO que ahora se encarga de buscar el businessId.
+            UsersDTO userDto = convertirADTO(user);
+            return ResponseEntity.ok(userDto);
         } else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Credenciales inválidas");
         }
     }
 
-
     /**
      * Obtiene las citas asociadas a un usuario.
-     *
      * @param id ID del usuario
      * @return lista de citas o error 404 si no existe usuario
      */
