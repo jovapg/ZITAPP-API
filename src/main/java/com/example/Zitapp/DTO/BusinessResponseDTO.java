@@ -25,6 +25,17 @@ public class BusinessResponseDTO {
     @Schema(description = "URL de la imagen del negocio", example = "http://imagen.com/negocio.jpg")
     private String imagenUrl;
 
+    @Schema(description = "telefono del negocio", example = "3111111")
+    private String telefono;
+
+    public String getTelefono() {
+        return telefono;
+    }
+
+    public void setTelefono(String telefono) {
+        this.telefono = telefono;
+    }
+
     @Schema(description = "ID del usuario propietario del negocio", example = "1")
     private Long idUsuario;
 

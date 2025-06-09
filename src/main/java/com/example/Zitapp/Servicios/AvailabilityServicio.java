@@ -7,6 +7,7 @@ import com.example.Zitapp.Modelos.Appointments; // Importar el modelo de Appoint
 import com.example.Zitapp.Repositorios.AvailabilityRepositorio;
 import com.example.Zitapp.Repositorios.BusinessRepositorio;
 import com.example.Zitapp.Repositorios.AppointmentsRepositorio; // Importar el repositorio de Appointments
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.time.DayOfWeek;
@@ -133,5 +134,10 @@ public class AvailabilityServicio {
             case SUNDAY: return "Domingo";
             default: return ""; // O lanza una excepción para un día no válido
         }
+    }
+
+    //obtener la disponibilidad por negocio
+    public List<Availability> obtenerDisponibilidadPorBusinessId(Integer businessId) {
+        return availabilityRepositorio.findByBusinessId(businessId);
     }
 }

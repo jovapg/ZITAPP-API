@@ -128,4 +128,13 @@ public class AvailabilityControlador {
                     .body("Error al obtener horas disponibles: " + e.getMessage());
         }
     }
+    @GetMapping("/business/{businessId}")
+    public ResponseEntity<List<Availability>> getAvailabilityByBusinessId(@PathVariable Integer businessId) {
+        List<Availability> availabilityList = availabilityServicio.obtenerDisponibilidadPorBusinessId(businessId);
+        if (availabilityList.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.ok(availabilityList);
+    }
+
 }

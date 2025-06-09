@@ -29,7 +29,8 @@ public class Appointments {
 
     @ManyToOne(fetch = FetchType.EAGER, optional = false)
     @JoinColumn(name = "id_negocio", nullable = false)
-    @JsonManagedReference("appointment-to-business") // Esto está bien si el Business tiene una @JsonBackReference a Appointments
+    @JsonManagedReference("appointment-to-business")// Esto está bien si el Business tiene una @JsonBackReference a Appointments
+    @JsonIgnoreProperties({"services", "availabilities"})// Esto está bien si el Business tiene una @JsonBackReference a Appointments
     private Business business;
 
 
